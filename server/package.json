@@ -1,0 +1,60 @@
+{
+  "name": "kubernetes-custom-ui",
+  "version": "0.1.0",
+  "description": "Kubernetes Custom UI (server)",
+  "main": "dist/index.js",
+  "watch": {
+    "dev": "src"
+  },
+  "scripts": {
+    "babel": "babel src -d dist",
+    "lint": "eslint src",
+    "copy_config": "cp -r src/config/env dist/config/env",
+    "clean": "rm -rf dist",
+    "build": "npm run clean && npm run babel && npm run copy_config",
+    "start": "npm-watch",
+    "dev": "npm run lint && npm run build && node dist/index.js",
+    "prod": "cross-env NODE_ENV=production node dist/index.js",
+    "test": "cross-env NODE_ENV=test jest --config test/unit/jest.conf.js --coverage",
+    "precommit": "lint-staged"
+  },
+  "author": "javier.ortizsaorin@commercetools.de",
+  "license": "MIT",
+  "engines": {
+    "node": ">= 8.0.0",
+    "npm": ">= 5.0.0"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-jest": "^22.4.4",
+    "babel-preset-env": "^1.7.0",
+    "babel-preset-stage-3": "^6.24.1",
+    "eslint": "^4.19.1",
+    "eslint-config-airbnb": "^16.1.0",
+    "eslint-plugin-import": "^2.12.0",
+    "eslint-plugin-jest": "^21.15.2",
+    "eslint-plugin-jsx-a11y": "^6.0.3",
+    "eslint-plugin-react": "^7.8.2",
+    "husky": "^0.14.3",
+    "jest": "^22.4.4",
+    "lint-staged": "^7.1.2",
+    "npm-watch": "^0.3.0",
+    "prettier": "^1.12.1",
+    "prettier-eslint-cli": "^4.7.1"
+  },
+  "dependencies": {
+    "awilix": "^3.0.8",
+    "body-parser": "^1.18.3",
+    "compression": "^1.7.2",
+    "cors": "^2.8.4",
+    "cross-env": "^5.1.6",
+    "express": "^4.16.3",
+    "helmet": "^3.12.1",
+    "morgan": "^1.9.0",
+    "nconf": "^0.10.0",
+    "winston": "^2.4.2"
+  },
+  "lint-staged": {
+    "src/**/*.{js,json}": ["prettier-eslint --write", "git add"]
+  }
+}
