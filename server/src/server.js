@@ -1,3 +1,4 @@
+import path from 'path';
 import express from 'express';
 import morgan from 'morgan';
 import helmet from 'helmet';
@@ -22,6 +23,7 @@ function initMiddlewares({ app }) {
   app.use(bodyParser.json());
   app.use(bodyParser.urlencoded({ extended: false }));
   app.use(helmet());
+  app.use(express.static(path.resolve(__dirname, '../../client/dist')));
 }
 
 function initModulesServerRoutes({ app, container }) {
