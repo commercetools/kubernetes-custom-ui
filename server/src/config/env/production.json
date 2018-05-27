@@ -1,5 +1,17 @@
 {
   "LOGGER": {
     "LEVEL": "error"
+  },
+  "TOKEN": {
+    "SECRET": "",
+    "MAX_AGE_SECONDS": 86400
+  },
+  "COMMERCE_TOOLS": {
+    "API_HOST": "",
+    "OAUTH_URL": "",
+    "PROJECT_KEY": "",
+    "CLIENT_ID": "",
+    "CLIENT_SECRET": "",
+    "CONCURRENCY": 10
   }
 }

@@ -1,3 +1,18 @@
 {
-  "PORT": 3000
+  "PORT": 3000,
+  "LOGGER": {
+    "LEVEL": "debug"
+  },
+  "TOKEN": {
+    "SECRET": "dummy-token-secret",
+    "MAX_AGE_SECONDS": 0
+  },
+  "COMMERCE_TOOLS": {
+    "API_HOST": "dummy-commercetools-api-host",
+    "OAUTH_URL": "dummy-commercetools-oauth-url",
+    "PROJECT_KEY": "dummy-commercetools-project-key",
+    "CLIENT_ID": "dummy-commercetools-client-id",
+    "CLIENT_SECRET": "dummy-commercetools-client-secret",
+    "CONCURRENCY": 10
+  }
 }

@@ -38,11 +38,18 @@
     "husky": "^0.14.3",
     "jest": "^22.4.4",
     "lint-staged": "^7.1.2",
+    "nock": "^9.2.6",
     "npm-watch": "^0.3.0",
     "prettier": "^1.12.1",
     "prettier-eslint-cli": "^4.7.1"
   },
   "dependencies": {
+    "@commercetools/api-request-builder": "^3.7.2",
+    "@commercetools/sdk-client": "^1.5.6",
+    "@commercetools/sdk-middleware-auth": "^4.0.0",
+    "@commercetools/sdk-middleware-http": "^4.0.0",
+    "@commercetools/sdk-middleware-queue": "^1.1.6",
+    "@commercetools/sync-actions": "^1.24.0",
     "awilix": "^3.0.8",
     "body-parser": "^1.18.3",
     "compression": "^1.7.2",
@@ -50,8 +57,11 @@
     "cross-env": "^5.1.6",
     "express": "^4.16.3",
     "helmet": "^3.12.1",
+    "jsonwebtoken": "^8.2.1",
+    "lodash": "^4.17.10",
     "morgan": "^1.9.0",
     "nconf": "^0.10.0",
+    "node-fetch": "^2.1.2",
     "winston": "^2.4.2"
   },
   "lint-staged": {
