@@ -7,11 +7,13 @@ import cors from 'cors';
 import Container from './container';
 import routes from './routes';
 
+const isProduction = () => process.env.NODE_ENV === 'production';
+
 function initMiddlewares({ app }) {
   app.use(cors());
   app.use(compression());
 
-  if (process.env.NODE_ENV === 'production') {
+  if (isProduction()) {
     app.use(morgan('combined', {
       skip: (req, res) => res.statusCode < 500, // Log "not managed" errors
     }));
