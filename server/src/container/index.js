@@ -35,7 +35,8 @@ export default function () {
       passphrase: config.get('TOKEN:SECRET'),
       expiresIn: config.get('TOKEN:MAX_AGE_SECONDS')
         ? parseInt(config.get('TOKEN:MAX_AGE_SECONDS'), 10)
-        : 86400, // 1 day
+        : 86400, // 1 day,
+      authService: _container.resolve('authService'),
     };
   };
 

@@ -1,4 +1,4 @@
-import { NotAuthenticatedError } from '../../errors';
+import { NotAuthenticatedError, CommercetoolsError } from '../../errors';
 
 export default ({ commercetools }) => {
   const service = {};
@@ -20,7 +20,7 @@ export default ({ commercetools }) => {
           throw new NotAuthenticatedError();
         }
 
-        throw err;
+        throw new CommercetoolsError(err);
       });
   };
 

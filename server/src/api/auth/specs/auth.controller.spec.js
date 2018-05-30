@@ -4,6 +4,7 @@ import { NotAuthenticatedError } from '../../../errors';
 
 describe('Auth controller', () => {
   let authController;
+  let usersService;
   let passphrase;
   let expiresIn;
   let req;
@@ -13,7 +14,10 @@ describe('Auth controller', () => {
   beforeEach(() => {
     passphrase = 'test';
     expiresIn = 86400; // one day in seconds
-    authController = AuthController({ passphrase, expiresIn });
+    usersService = {
+      create: () => {},
+    };
+    authController = AuthController({ passphrase, expiresIn, usersService });
     req = {};
     res = {
       json: jest.fn(),
@@ -77,6 +81,57 @@ describe('Auth controller', () => {
 
         it('should pass down a "NotAuthenticatedError"', () =>
           expect(next).toHaveBeenCalledWith(new NotAuthenticatedError()));
+      });
+    });
+  });
+  describe('when signing up', () => {
+    describe('when success', () => {
+      let newUser;
+
+      beforeEach(async () => {
+        newUser = {
+          id: 'id1',
+          firstName: 'dummy-name',
+          lastName: 'dummy-last-name',
+          email: 'dummy-email@commercetools.de',
+          password: '12345',
+        };
+
+        req.body = {
+          firstName: 'dummy-name',
+          lastName: 'dummy-last-name',
+          email: 'dummy-email@commercetools.de',
+          password: '12345',
+        };
+
+        usersService.create = jest.fn().mockReturnValue(Promise.resolve(newUser));
+
+        authController.signUp(req, res);
+      });
+
+      it('should create the user', () =>
+        expect(usersService.create).toHaveBeenCalledWith({
+          firstName: 'dummy-name',
+          lastName: 'dummy-last-name',
+          email: 'dummy-email@commercetools.de',
+          password: '12345',
+        }));
+
+      it('should sign in the new user', () =>
+        expect(res.json).toHaveBeenCalledWith(authController.getSignInResponse(newUser)));
+    });
+    describe('when errors', () => {
+      describe('when the user is not signed up', () => {
+        beforeEach(async () => {
+          req.user = null;
+
+          usersService.create = jest.fn().mockReturnValue(Promise.reject(new Error('error')));
+
+          authController.signUp(req, res, next);
+        });
+
+        it('should pass down the error', () =>
+          expect(next).toHaveBeenCalledWith(new Error('error')));
       });
     });
   });

@@ -2,7 +2,7 @@ import jwt from 'jsonwebtoken';
 import { compose, omit } from 'lodash/fp';
 import { NotAuthenticatedError } from '../../errors';
 
-export default ({ passphrase, expiresIn }) => {
+export default ({ passphrase, expiresIn, usersService }) => {
   const controller = {};
 
   const getTokenPayload = user => ({ id: user.id });
@@ -25,6 +25,12 @@ export default ({ passphrase, expiresIn }) => {
 
     return next(new NotAuthenticatedError());
   };
+
+  controller.signUp = (req, res, next) =>
+    usersService
+      .create(req.body)
+      .then(user => res.json(controller.getSignInResponse(user)))
+      .catch(next);
 
   return controller;
 };

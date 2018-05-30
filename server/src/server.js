@@ -7,7 +7,7 @@ import bodyParser from 'body-parser';
 import cors from 'cors';
 import Container from './container';
 import routes from './routes';
-import { ValidationError, NotAuthenticatedError } from './errors';
+import { ValidationError, NotAuthenticatedError, CommercetoolsError } from './errors';
 
 function initMiddlewares({ app }) {
   app.use(cors());
@@ -36,6 +36,7 @@ function sendError(res, err, statusCode) {
     code: err.code || statusCode,
     error: err.constructor.name,
     message: err.message,
+    ...(err.errors && { errors: err.errors }),
   });
 }
 
@@ -49,6 +50,12 @@ function initErrorRoutes({ app, logger }) {
       return sendError(res, err, 400);
     } else if (err instanceof NotAuthenticatedError) {
       return sendError(res, err, 401);
+    } else if (err instanceof CommercetoolsError) {
+      if (err.code >= 500) {
+        logger.error(JSON.stringify(err));
+      }
+
+      return sendError(res, err, err.code);
     } else {
       // If any of the previous middlewares has a "not managed error" we log it and return HTTP 500
       logger.error(err.stack);
