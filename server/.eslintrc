@@ -1,0 +1,23 @@
+{
+  "parserOptions": {
+    "ecmaVersion": 2017,
+    "sourceType": "module"
+  },
+  "extends": "airbnb-base",
+  "plugins": ["jest"],
+  "rules": {
+    "no-unused-vars": "warn",
+    "no-console": "off",
+    "arrow-body-style": "off",
+    "indent": "warn",
+    "consistent-return": "off",
+    "no-else-return": "off",
+    "global-require": "off",
+    "no-param-reassign": ["error", { "props": false }],
+    "new-cap": "off",
+    "arrow-parens": "off"
+  },
+  "env": {
+    "jest/globals": true
+  }
+}
