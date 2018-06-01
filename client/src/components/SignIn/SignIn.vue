@@ -14,13 +14,13 @@
                 <label for="email">E-Mail</label>
 
                 <input id="email" type="email" class="form-control"
-                  name="email" v-model="email" required autofocus>
+                  name="email" v-model.trim="email" required autofocus>
               </div>
 
               <div class="form-group">
                 <label for="password">Password</label>
                 <input id="password" type="password" class="form-control"
-                  name="password" v-model="password" required>
+                  name="password" v-model.trim="password" required>
               </div>
 
               <div class="form-group mt-5">
@@ -45,6 +45,8 @@
 </template>
 
 <script>
+import { mapActions } from 'vuex'
+
 export default {
   data () {
     return {
@@ -53,7 +55,21 @@ export default {
     }
   },
   methods: {
-    signIn () {},
+    signIn () {
+      if (this.email && this.password)
+        return this.SIGN_IN({ email: this.email, password: this.password })
+          .then(() => {
+            // In the next iteration we will add the Vue router
+            // and we will route the user to the cronjobs list page
+          })
+          .catch((err) => {
+            // In the next iteration we wil notify the user using a notifier
+            console.err('err :', err)
+          })
+
+      return Promise.resolve()
+    },
+    ...mapActions('authentication', ['SIGN_IN']),
   },
 }
 </script>
