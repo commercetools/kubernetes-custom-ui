@@ -12,7 +12,7 @@ import conf from 'nconf';
   3. ConfigFiles
 
   Within the config files, the environment config file overwrites the default config file.
-  For example, any variable in "development.json" that exists in "default.json" is overwritten.
+  For example, any variable in "development.json" overwrites the values in "default.json"
 */
 export default () => {
   process.env.NODE_ENV = process.env.NODE_ENV || 'development';
