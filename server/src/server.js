@@ -8,7 +8,12 @@ import cors from 'cors';
 import Container from './container';
 import routes from './routes';
 
-function initMiddlewares({ app }) {
+const getStaticMaxAge = config =>
+  (isProduction() && parseInt(config.get('STATIC_MAX_CACHE_IN_SECONDS'), 10)
+    ? parseInt(config.get('STATIC_MAX_CACHE_IN_SECONDS') * 1000, 10)
+    : 0);
+
+function initMiddlewares({ app, config }) {
   app.use(cors());
   app.use(compression());
 
@@ -20,10 +25,12 @@ function initMiddlewares({ app }) {
     app.use(morgan('dev'));
   }
 
+  app.use(helmet());
+  app.use(express.static(path.resolve(__dirname, '../../client/dist'), {
+    maxAge: getStaticMaxAge(config),
+  }));
   app.use(bodyParser.json());
   app.use(bodyParser.urlencoded({ extended: false }));
-  app.use(helmet());
-  app.use(express.static(path.resolve(__dirname, '../../client/dist')));
 }
 
 function initModulesServerRoutes({ app, container }) {
@@ -52,7 +59,7 @@ function getServer() {
 
   const app = express();
 
-  initMiddlewares({ app });
+  initMiddlewares({ app, config });
   initModulesServerRoutes({ app, container });
   initErrorRoutes({ app, logger });
 
