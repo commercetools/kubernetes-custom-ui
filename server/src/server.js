@@ -9,11 +9,18 @@ import Container from './container';
 import routes from './routes';
 import { ValidationError, NotAuthenticatedError } from './errors';
 
-function initMiddlewares({ app }) {
+const isProduction = () => process.env.NODE_ENV === 'production';
+
+const getStaticMaxAge = config =>
+  (isProduction() && parseInt(config.get('STATIC_MAX_CACHE_IN_SECONDS'), 10)
+    ? parseInt(config.get('STATIC_MAX_CACHE_IN_SECONDS') * 1000, 10)
+    : 0);
+
+function initMiddlewares({ app, config }) {
   app.use(cors());
   app.use(compression());
 
-  if (process.env.NODE_ENV === 'production') {
+  if (isProduction()) {
     app.use(morgan('combined', {
       skip: (req, res) => res.statusCode < 500, // Log "not managed" errors
     }));
@@ -21,10 +28,12 @@ function initMiddlewares({ app }) {
     app.use(morgan('dev'));
   }
 
+  app.use(helmet());
+  app.use(express.static(path.resolve(__dirname, '../../client/dist'), {
+    maxAge: getStaticMaxAge(config),
+  }));
   app.use(bodyParser.json());
   app.use(bodyParser.urlencoded({ extended: false }));
-  app.use(helmet());
-  app.use(express.static(path.resolve(__dirname, '../../client/dist')));
 }
 
 function initModulesServerRoutes({ app, container }) {
@@ -67,7 +76,7 @@ function getServer() {
 
   const app = express();
 
-  initMiddlewares({ app });
+  initMiddlewares({ app, config });
   initModulesServerRoutes({ app, container });
   initErrorRoutes({ app, logger });
 
