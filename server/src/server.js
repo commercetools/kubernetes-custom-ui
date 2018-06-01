@@ -1,3 +1,4 @@
+import path from 'path';
 import express from 'express';
 import morgan from 'morgan';
 import helmet from 'helmet';
@@ -6,6 +7,7 @@ import bodyParser from 'body-parser';
 import cors from 'cors';
 import Container from './container';
 import routes from './routes';
+import { ValidationError, NotAuthenticatedError, CommercetoolsError } from './errors';
 
 const isProduction = () => process.env.NODE_ENV === 'production';
 
@@ -24,10 +26,20 @@ function initMiddlewares({ app }) {
   app.use(bodyParser.json());
   app.use(bodyParser.urlencoded({ extended: false }));
   app.use(helmet());
+  app.use(express.static(path.resolve(__dirname, '../../client/dist')));
 }
 
 function initModulesServerRoutes({ app, container }) {
   routes({ app, container });
+}
+
+function sendError(res, err, statusCode) {
+  return res.status(statusCode).json({
+    code: err.code || statusCode,
+    error: err.constructor.name,
+    message: err.message,
+    ...(err.errors && { errors: err.errors }),
+  });
 }
 
 function initErrorRoutes({ app, logger }) {
@@ -36,9 +48,21 @@ function initErrorRoutes({ app, logger }) {
       return next();
     }
 
-    // If any of the previous middlewares has a "not managed error" we log it and return HTTP 500
-    logger.error(err.stack);
-    return res.sendStatus(500);
+    if (err instanceof ValidationError) {
+      return sendError(res, err, 400);
+    } else if (err instanceof NotAuthenticatedError) {
+      return sendError(res, err, 401);
+    } else if (err instanceof CommercetoolsError) {
+      if (err.code >= 500) {
+        logger.error(JSON.stringify(err));
+      }
+
+      return sendError(res, err, err.code);
+    } else {
+      // If any of the previous middlewares has a "not managed error" we log it and return HTTP 500
+      logger.error(err.stack);
+      return sendError(res, err, 500);
+    }
   });
 }
 

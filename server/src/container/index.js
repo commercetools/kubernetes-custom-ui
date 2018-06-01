@@ -2,6 +2,10 @@ import path from 'path';
 import { createContainer, asFunction, Lifetime } from 'awilix';
 import Config from '../config';
 import Logger from '../logger';
+import AuthController from '../api/auth/auth.controller';
+import AuthLocalMiddleware from '../authentication/middlewares/local.middleware';
+import CommerceTools from '../commercetools';
+import AuthJwtMiddleware from '../authentication/middlewares/jwt.middleware';
 
 // Dependency Injection Container
 export default function () {
@@ -24,6 +28,39 @@ export default function () {
     };
   };
 
+  const getAuthControllerParams = _container => {
+    const config = _container.resolve('config');
+
+    return {
+      passphrase: config.get('TOKEN:SECRET'),
+      expiresIn: config.get('TOKEN:MAX_AGE_SECONDS')
+        ? parseInt(config.get('TOKEN:MAX_AGE_SECONDS'), 10)
+        : 86400, // 1 day,
+      authService: _container.resolve('authService'),
+    };
+  };
+
+  const getCommerceToolsParams = _container => {
+    const config = _container.resolve('config');
+
+    return {
+      clientId: config.get('COMMERCE_TOOLS:CLIENT_ID'),
+      clientSecret: config.get('COMMERCE_TOOLS:CLIENT_SECRET'),
+      projectKey: config.get('COMMERCE_TOOLS:PROJECT_KEY'),
+      host: config.get('COMMERCE_TOOLS:API_HOST'),
+      oauthHost: config.get('COMMERCE_TOOLS:OAUTH_URL'),
+      concurrency: config.get('COMMERCE_TOOLS:CONCURRENCY'),
+    };
+  };
+
+  const getJwtMiddlewareParams = _container => {
+    const config = _container.resolve('config');
+
+    return {
+      passphrase: config.get('TOKEN:SECRET'),
+    };
+  };
+
   // Registering and auto resolving the dependencies between controllers and services
   container.loadModules(
     [
@@ -42,6 +79,10 @@ export default function () {
   container.register({
     config: getSingleton(Config),
     logger: getSingleton(Logger, getLoggerParams),
+    commercetools: getSingleton(CommerceTools, getCommerceToolsParams),
+    authController: getSingleton(AuthController, getAuthControllerParams),
+    authLocalMiddleware: getSingleton(AuthLocalMiddleware),
+    authJwtMiddleware: getSingleton(AuthJwtMiddleware, getJwtMiddlewareParams),
   });
 
   return container;
