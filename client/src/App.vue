@@ -2,6 +2,7 @@
   <div id="app">
     <div class="container-fluid">
       <sign-in/>
+      <vue-progress-bar></vue-progress-bar>
     </div>
   </div>
 </template>

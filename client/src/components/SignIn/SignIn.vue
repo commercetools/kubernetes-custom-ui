@@ -56,16 +56,21 @@ export default {
   },
   methods: {
     signIn () {
-      if (this.email && this.password)
+      if (this.email && this.password) {
+        this.$Progress.start()
+
         return this.SIGN_IN({ email: this.email, password: this.password })
           .then(() => {
             // In the next iteration we will add the Vue router
             // and we will route the user to the cronjobs list page
+            this.$Progress.finish()
           })
           .catch((err) => {
             // In the next iteration we wil notify the user using a notifier
             console.err('err :', err)
+            this.$Progress.finish()
           })
+      }
 
       return Promise.resolve()
     },

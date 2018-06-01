@@ -1,4 +1,5 @@
-import { shallowMount } from '@vue/test-utils'
+import { shallowMount, createLocalVue } from '@vue/test-utils'
+import VueProgressBar from 'vue-progressbar'
 import SignIn from './SignIn'
 
 describe('Component', () => {
@@ -6,7 +7,13 @@ describe('Component', () => {
   let vm
 
   beforeEach(() => {
-    wrapper = shallowMount(SignIn)
+    const localVue = createLocalVue()
+
+    localVue.use(VueProgressBar)
+
+    wrapper = shallowMount(SignIn, {
+      localVue,
+    })
     // eslint-disable-next-line
     vm = wrapper.vm
   })
