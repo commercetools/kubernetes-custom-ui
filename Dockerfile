@@ -13,6 +13,9 @@ RUN npm run build
 WORKDIR /server
 RUN npm install
 RUN npm run build
+
+# INSTALL PRODUCTION DEPENDENCIES
+RUN rm -rf node_modules
 ENV NODE_ENV production
 RUN npm install
 
