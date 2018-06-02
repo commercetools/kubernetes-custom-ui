@@ -1,4 +1,4 @@
-<template lang="html">
+<template>
   <div class="sign-in">
     <div class="row justify-content-md-center h-100">
       <div class="card-wrapper">
@@ -33,6 +33,9 @@
                 Don't have an account? <a href="#">Create One</a>
               </div>
 
+              <div class="error-message mt-3 text-center text-danger" v-show="errorMessage">
+                <h6>{{errorMessage}}</h6>
+              </div>
             </form>
           </div>
         </div>
@@ -52,12 +55,14 @@ export default {
     return {
       email: '',
       password: '',
+      errorMessage: '',
     }
   },
   methods: {
     signIn () {
       if (this.email && this.password) {
         this.$Progress.start()
+        this.errorMessage = ''
 
         return this.SIGN_IN({ email: this.email, password: this.password })
           .then(() => {
@@ -66,13 +71,16 @@ export default {
             this.$Progress.finish()
           })
           .catch((err) => {
-            // In the next iteration we wil notify the user using a notifier
-            console.err('err :', err)
             this.$Progress.finish()
+            this.handleError(err)
           })
       }
 
       return Promise.resolve()
+    },
+    handleError (err) {
+      if (err.response.status === 401) this.errorMessage = 'Invalid email or password'
+      else this.errorMessage = 'Opsss, something went wrong. Please contact the administrator'
     },
     ...mapActions('authentication', ['SIGN_IN']),
   },

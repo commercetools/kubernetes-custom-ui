@@ -57,5 +57,67 @@ describe('Component', () => {
 
       it('should not sign in the user', () => expect(vm.SIGN_IN).not.toHaveBeenCalled())
     })
+    describe('when the user is not authenticated', () => {
+      beforeEach(() => {
+        vm.email = 'dummy-email@commercetools.de'
+        vm.password = '12345'
+
+        vm.SIGN_IN = jest.fn().mockRejectedValue({
+          response: {
+            status: 401,
+          },
+        })
+
+        form.trigger('submit')
+      })
+
+      it('should show the error message', (done) => {
+        vm.$nextTick(() => {
+          expect(wrapper.find('.error-message').isVisible()).toBe(true)
+          done()
+        })
+      })
+
+      it('should show "Invalid email or password" message', (done) => {
+        vm.$nextTick(() => {
+          expect(wrapper.find('.error-message').text()).toBe('Invalid email or password')
+          done()
+        })
+      })
+    })
+    describe('when there is an unhandled error in the response', () => {
+      beforeEach(() => {
+        vm.email = 'dummy-email@commercetools.de'
+        vm.password = '12345'
+
+        vm.SIGN_IN = jest.fn().mockRejectedValue({
+          response: {
+            status: 500,
+          },
+        })
+
+        form.trigger('submit')
+      })
+
+      it('should show the error message', (done) => {
+        vm.$nextTick(() => {
+          expect(wrapper.find('.error-message').isVisible()).toBe(true)
+          done()
+        })
+      })
+
+      // prettier-ignore
+      it(
+        'should show "Opsss, something went wrong. Please contact the administrator" message'
+        , (done) => {
+          vm.$nextTick(() => {
+          // prettier-ignore
+            expect(wrapper.find('.error-message').text())
+              .toBe('Opsss, something went wrong. Please contact the administrator')
+            done()
+          })
+        },
+      )
+    })
   })
 })
