@@ -1,20 +1,15 @@
 <template>
   <div id="app">
     <div class="container-fluid">
-      <sign-in/>
+      <router-view></router-view>
       <vue-progress-bar></vue-progress-bar>
     </div>
   </div>
 </template>
 
 <script>
-import SignIn from './components/SignIn'
-
 export default {
   name: 'App',
-  components: {
-    SignIn,
-  },
 }
 </script>
 <style lang="scss">
