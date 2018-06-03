@@ -2,6 +2,7 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 import createPersist from 'vuex-localstorage'
 import authentication from './authentication'
+import general from './general'
 
 export default function () {
   Vue.use(Vuex)
@@ -11,6 +12,10 @@ export default function () {
       authentication: {
         namespaced: true,
         ...authentication(),
+      },
+      general: {
+        namespaced: true,
+        ...general(),
       },
     },
     plugins: [

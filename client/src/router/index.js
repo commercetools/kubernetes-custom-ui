@@ -1,7 +1,9 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 import SignIn from '@/components/SignIn'
+import SignUp from '@/components/SignUp'
 import Cronjobs from '@/components/Cronjobs'
+import Dashboard from '@/components/Dashboard'
 
 export default ({ authentication }) => {
   Vue.use(Router)
@@ -37,10 +39,23 @@ export default ({ authentication }) => {
         component: SignIn,
       },
       {
-        path: '/cronjobs',
-        name: 'Cronjobs',
-        component: Cronjobs,
-        meta: { requiresAuthentication: true },
+        path: '/signup',
+        name: 'SignUp',
+        component: SignUp,
+      },
+      {
+        path: '/dashboard',
+        name: 'Dashboard',
+        component: Dashboard,
+        redirect: { name: 'Cronjobs' },
+        children: [
+          {
+            path: 'cronjobs',
+            name: 'Cronjobs',
+            component: Cronjobs,
+            meta: { requiresAuthentication: true },
+          },
+        ],
       },
     ],
   })

@@ -2,17 +2,23 @@ import { shallowMount, createLocalVue } from '@vue/test-utils'
 import VueProgressBar from 'vue-progressbar'
 import SignIn from './SignIn'
 
-describe('Component', () => {
+describe('SignIn Component', () => {
   let wrapper
   let vm
 
   beforeEach(() => {
     const localVue = createLocalVue()
-
     localVue.use(VueProgressBar)
 
     wrapper = shallowMount(SignIn, {
       localVue,
+      mocks: {
+        $route: {
+          path: '/dashboard',
+          name: 'Dashboard',
+        },
+      },
+      stubs: ['router-link'],
     })
     // eslint-disable-next-line
     vm = wrapper.vm

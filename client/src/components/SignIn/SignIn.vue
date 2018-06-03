@@ -30,7 +30,8 @@
               </div>
 
               <div class="mt-3 text-center">
-                Don't have an account? <a href="#">Create One</a>
+                Don't have an account?
+                <router-link :to="{ name: 'SignUp' }">Create One</router-link>  
               </div>
 
               <div class="error-message mt-3 text-center text-danger" v-show="errorMessage">
@@ -48,10 +49,11 @@
 </template>
 
 <script>
+import Vue from 'vue'
 import { mapActions } from 'vuex'
 
 export default {
-  data () {
+  data() {
     return {
       email: '',
       password: '',
@@ -59,18 +61,17 @@ export default {
     }
   },
   methods: {
-    signIn () {
+    signIn() {
       if (this.email && this.password) {
         this.$Progress.start()
         this.errorMessage = ''
 
         return this.SIGN_IN({ email: this.email, password: this.password })
           .then(() => {
-            // In the next iteration we will add the Vue router
-            // and we will route the user to the cronjobs list page
             this.$Progress.finish()
+            this.$router.push({ name: 'Dashboard' })
           })
-          .catch((err) => {
+          .catch(err => {
             this.$Progress.finish()
             this.handleError(err)
           })
@@ -78,7 +79,7 @@ export default {
 
       return Promise.resolve()
     },
-    handleError (err) {
+    handleError(err) {
       if (err.response.status === 401) this.errorMessage = 'Invalid email or password'
       else this.errorMessage = 'Opsss, something went wrong. Please contact the administrator'
     },

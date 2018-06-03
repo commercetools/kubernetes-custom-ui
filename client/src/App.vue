@@ -1,9 +1,7 @@
 <template>
   <div id="app">
-    <div class="container-fluid">
-      <router-view></router-view>
-      <vue-progress-bar></vue-progress-bar>
-    </div>
+    <router-view></router-view>
+    <vue-progress-bar></vue-progress-bar>
   </div>
 </template>
 
