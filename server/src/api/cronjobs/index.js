@@ -1,5 +1,5 @@
 export default ({ router, cronjobsController }) => {
-  router.get('/', cronjobsController.listCronJobs);
+  router.get('/', cronjobsController.find);
 
   return router;
 };

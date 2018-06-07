@@ -58,15 +58,21 @@
     "express": "^4.16.3",
     "express-jwt": "^5.3.1",
     "fastest-validator": "^0.6.7",
+    "google-auth-library": "^1.5.0",
     "helmet": "^3.12.1",
     "jsonwebtoken": "^8.2.1",
     "lodash": "^4.17.10",
     "morgan": "^1.9.0",
     "nconf": "^0.10.0",
     "node-fetch": "^2.1.2",
+    "request": "^2.87.0",
+    "request-promise-native": "^1.0.5",
     "winston": "^2.4.2"
   },
   "lint-staged": {
-    "src/**/*.{js,json}": ["prettier-eslint --write", "git add"]
+    "src/**/*.{js,json}": [
+      "prettier-eslint --write",
+      "git add"
+    ]
   }
 }

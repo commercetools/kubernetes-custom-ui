@@ -14,5 +14,15 @@
     "CLIENT_ID": "dummy-commercetools-client-id",
     "CLIENT_SECRET": "dummy-commercetools-client-secret",
     "CONCURRENCY": 10
+  },
+  "KUBERNETES": {
+    "PROVIDER": "dummy-kubernetes-cloud-provider",
+    "PROVIDERS": {
+      "GOOGLE_CLOUD": {
+        "CLIENT_EMAIL": "dummy-kubernetes-google-cloud-email",
+        "PRIVATE_KEY": "dummy-kubernetes-google-cloud-private-key"
+      }
+    },
+    "HOST": "dummy-kubernetes-host"
   }
 }

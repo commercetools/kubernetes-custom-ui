@@ -3,7 +3,7 @@ export default ({ k8sClient }) => {
 
   service.find = async (params = {}) =>
     k8sClient({
-      url: '/apis/batch/v1beta1/namespaces/default/cronjobs',
+      url: '/apis/batch/v1/namespaces/default/jobs',
       method: 'GET',
       qs: params,
     });
