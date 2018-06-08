@@ -5,6 +5,7 @@ import Logger from '../logger';
 import AuthController from '../api/auth/auth.controller';
 import AuthLocalMiddleware from '../authentication/middlewares/local.middleware';
 import CommerceTools from '../commercetools';
+import AuthJwtMiddleware from '../authentication/middlewares/jwt.middleware';
 import constants from '../constants';
 
 // Dependency Injection Container
@@ -52,6 +53,14 @@ export default function () {
     };
   };
 
+  const getJwtMiddlewareParams = _container => {
+    const config = _container.resolve('config');
+
+    return {
+      passphrase: config.get('TOKEN:SECRET'),
+    };
+  };
+
   // Registering and auto resolving the dependencies between controllers and services
   container.loadModules(
     [
@@ -73,6 +82,7 @@ export default function () {
     commercetools: getSingleton(CommerceTools, getCommerceToolsParams),
     authController: getSingleton(AuthController, getAuthControllerParams),
     authLocalMiddleware: getSingleton(AuthLocalMiddleware),
+    authJwtMiddleware: getSingleton(AuthJwtMiddleware, getJwtMiddlewareParams),
   });
 
   return container;
