@@ -49,27 +49,31 @@ function sendError(res, err, statusCode) {
   });
 }
 
+function handleError({ err, res, logger }) {
+  if (err instanceof ValidationError) {
+    return sendError(res, err, 400);
+  } else if (err instanceof NotAuthenticatedError) {
+    return sendError(res, err, 401);
+  } else if (err instanceof CommercetoolsError) {
+    if (err.code >= 500) {
+      logger.error(JSON.stringify(err));
+    }
+
+    return sendError(res, err, err.code);
+  } else {
+    // If any of the previous middlewares has a "not managed error" we log it and return HTTP 500
+    logger.error(err.stack);
+    return sendError(res, err, 500);
+  }
+}
+
 function initErrorRoutes({ app, logger }) {
   app.use((err, req, res, next) => {
     if (!err) {
       return next();
     }
 
-    if (err instanceof ValidationError) {
-      return sendError(res, err, 400);
-    } else if (err instanceof NotAuthenticatedError) {
-      return sendError(res, err, 401);
-    } else if (err instanceof CommercetoolsError) {
-      if (err.code >= 500) {
-        logger.error(JSON.stringify(err));
-      }
-
-      return sendError(res, err, err.code);
-    } else {
-      // If any of the previous middlewares has a "not managed error" we log it and return HTTP 500
-      logger.error(err.stack);
-      return sendError(res, err, 500);
-    }
+    return handleError({ err, res, logger });
   });
 }
 
