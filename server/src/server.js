@@ -7,6 +7,7 @@ import bodyParser from 'body-parser';
 import cors from 'cors';
 import Container from './container';
 import routes from './routes';
+import { ValidationError, NotAuthenticatedError } from './errors';
 
 const isProduction = () => process.env.NODE_ENV === 'production';
 
@@ -39,15 +40,29 @@ function initModulesServerRoutes({ app, container }) {
   routes({ app, container });
 }
 
+function sendError(res, err, statusCode) {
+  return res.status(statusCode).json({
+    code: err.code || statusCode,
+    error: err.constructor.name,
+    message: err.message,
+  });
+}
+
 function initErrorRoutes({ app, logger }) {
   app.use((err, req, res, next) => {
     if (!err) {
       return next();
     }
 
-    // If any of the previous middlewares has a "not managed error" we log it and return HTTP 500
-    logger.error(err.stack);
-    return res.sendStatus(500);
+    if (err instanceof ValidationError) {
+      return sendError(res, err, 400);
+    } else if (err instanceof NotAuthenticatedError) {
+      return sendError(res, err, 401);
+    } else {
+      // If any of the previous middlewares has a "not managed error" we log it and return HTTP 500
+      logger.error(err.stack);
+      return sendError(res, err, 500);
+    }
   });
 }
 
