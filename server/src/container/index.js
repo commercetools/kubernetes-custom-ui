@@ -6,6 +6,7 @@ import AuthController from '../api/auth/auth.controller';
 import AuthLocalMiddleware from '../authentication/middlewares/local.middleware';
 import CommerceTools from '../commercetools';
 import AuthJwtMiddleware from '../authentication/middlewares/jwt.middleware';
+import constants from '../constants';
 
 // Dependency Injection Container
 export default function () {
@@ -35,7 +36,7 @@ export default function () {
       passphrase: config.get('TOKEN:SECRET'),
       expiresIn: config.get('TOKEN:MAX_AGE_SECONDS')
         ? parseInt(config.get('TOKEN:MAX_AGE_SECONDS'), 10)
-        : 86400, // 1 day
+        : constants.DEFAULT_TOKEN_MAX_AGE_SECONDS,
     };
   };
 
