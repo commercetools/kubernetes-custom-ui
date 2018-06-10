@@ -44,6 +44,7 @@
                   <td>{{cronjob.next}}</td>
                   <td>
                     <button type="submit" class="btn btn-primary btn-sm"
+                      @click.prevent="run(cronjob)"
                       :disabled="isRunning(cronjob.status)">Run</button>
                   </td>
                 </tr>
@@ -70,42 +71,42 @@ const cronjobsService = CronjobsService()
 const podsService = PodsService()
 
 export default {
-  data () {
+  data() {
     return {
       cronjobs: [],
     }
   },
-  created () {
+  created() {
     this.getCronjobs()
   },
   methods: {
-    getRandom (threshold) {
+    getRandom(threshold) {
       return Math.floor(Math.random() * threshold)
     },
-    async getCronjobs () {
+    async getCronjobs() {
       try {
         this.$Progress.start()
         this.cronjobs = await cronjobsService.find()
         this.$Progress.finish()
       } catch (err) {
-        console.log(err)
+        this.$notify({ type: 'error', text: err.message })
       }
     },
-    statusClass (status) {
+    statusClass(status) {
       if (status === 'Succeeded') return 'bgc-green-50 c-green-700'
       else if (this.isRunning(status)) return 'bgc-orange-50 c-orange-700'
       return 'bgc-red-50 c-red-700'
     },
-    isRunning (status) {
+    isRunning(status) {
       return status === 'Running' || status === 'Pending'
     },
-    formatDate (date) {
+    formatDate(date) {
       return date ? moment(date).format('DD/MM/YYYY HH:mm:ss') : '-'
     },
-    duration (date1, date2) {
+    duration(date1, date2) {
       return moment.duration(moment(date1).diff(moment(date2))).asSeconds()
     },
-    async getLog (cronjob) {
+    async getLog(cronjob) {
       try {
         const logData = await podsService.getLog(cronjob.pod)
 
@@ -123,12 +124,23 @@ export default {
 
         link.click()
       } catch (err) {
-        console.log(err)
+        this.$notify({ type: 'error', text: err.message })
+      }
+    },
+    async run(cronjob) {
+      try {
+        await cronjobsService.run(cronjob.name)
+        this.$notify({
+          type: 'success',
+          text: 'The job has been scheduled. Please refresh the list after few seconds',
+        })
+      } catch (err) {
+        this.$notify({ type: 'error', text: err.message })
       }
     },
   },
   computed: {
-    cronjobsFormatted () {
+    cronjobsFormatted() {
       return this.cronjobs.map(cronjob => ({
         ...cronjob,
         latestExecution: this.formatDate(cronjob.latestExecution),
@@ -143,10 +155,10 @@ export default {
         schedule: cronstrue.toString(cronjob.schedule),
       }))
     },
-    faUndo () {
+    faUndo() {
       return faUndo
     },
-    faFileAlt () {
+    faFileAlt() {
       return faFileAlt
     },
   },

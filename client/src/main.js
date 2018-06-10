@@ -3,6 +3,7 @@ import BootstrapVue from 'bootstrap-vue'
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
 import VueProgressBar from 'vue-progressbar'
+import notifications from 'vue-notification'
 import App from './App'
 import Store from './store'
 import Router from './router'
@@ -26,6 +27,7 @@ Vue.use(BootstrapVue)
 Vue.use(VueProgressBar, { color: '#3371e3', failedColor: 'red', thickness: '2px' })
 Vue.use(authentication)
 Vue.use(httpClient)
+Vue.use(notifications)
 
 /* eslint-disable no-new */
 new Vue({

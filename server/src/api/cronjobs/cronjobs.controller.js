@@ -1,4 +1,5 @@
 import { curry } from 'lodash/fp';
+import { ValidationError } from '../../errors';
 
 export default ({ cronjobsService, jobsService, podsService }) => {
   const controller = {};
@@ -15,6 +16,25 @@ export default ({ cronjobsService, jobsService, podsService }) => {
     (new Date(job1.status.startTime).getTime() > new Date(job2.status.startTime).getTime()
       ? job1
       : job2);
+
+  const getJobDraftFromCronjob = (cronjob, apiVersion) => {
+    return {
+      metadata: {
+        name: `${cronjob.metadata.name}-manual-${Math.floor(Date.now() / 1000)}`,
+        namespace: cronjob.metadata.namespace,
+        labels: cronjob.metadata.labels,
+        ownerReferences: [
+          {
+            apiVersion,
+            kind: 'CronJob',
+            name: cronjob.metadata.name,
+            uid: cronjob.metadata.uid,
+          },
+        ],
+      },
+      spec: cronjob.spec.jobTemplate.spec,
+    };
+  };
 
   controller.find = async (req, res, next) => {
     try {
@@ -37,6 +57,26 @@ export default ({ cronjobsService, jobsService, podsService }) => {
           completionTime: latestJob.status.completionTime,
         };
       }));
+    } catch (err) {
+      next(err);
+    }
+  };
+
+  controller.run = async (req, res, next) => {
+    const { name } = req.params;
+
+    try {
+      const cronjobList = await cronjobsService.find({
+        fieldSelector: `metadata.name=${name}`,
+      });
+
+      if (cronjobList.items.length) {
+        const jobDraft = getJobDraftFromCronjob(cronjobList.items[0], cronjobList.apiVersion);
+        await jobsService.create(jobDraft);
+        return res.send('success');
+      }
+
+      return next(new ValidationError("the cronjob doesn't exist"));
     } catch (err) {
       next(err);
     }

@@ -12,5 +12,14 @@ export default ({ k8sClient }) => {
       throw new K8sError(err);
     });
 
+  service.create = async jobDraft =>
+    k8sClient({
+      url: '/apis/batch/v1/namespaces/default/jobs',
+      method: 'POST',
+      body: jobDraft,
+    }).catch(err => {
+      throw new K8sError(err);
+    });
+
   return service;
 };

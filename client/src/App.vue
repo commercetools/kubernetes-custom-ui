@@ -2,6 +2,7 @@
   <div id="app">
     <router-view></router-view>
     <vue-progress-bar></vue-progress-bar>
+    <notifications position="top center"></notifications>
   </div>
 </template>
 
