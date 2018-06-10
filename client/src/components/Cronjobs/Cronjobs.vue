@@ -36,7 +36,8 @@
                     <span class="badge p-10 lh-0 tt-c bgc-blue-50 c-blue-700">
                       ({{cronjob.executionTime}} sec)
                     </span>
-                    <a href="" class="pL-10" v-show="!isRunning(cronjob.status)">
+                    <a href="" @click.prevent="getLog(cronjob)"
+                      class="pL-10" v-show="!isRunning(cronjob.status)">
                       <font-awesome-icon :icon="faFileAlt" />
                     </a>
                   </td>
@@ -60,11 +61,13 @@ import cronstrue from 'cronstrue'
 import cronParser from 'cron-parser'
 import moment from 'moment'
 import CronjobsService from '@/services/cronjobs'
+import PodsService from '@/services/pods'
 import FontAwesomeIcon from '@fortawesome/vue-fontawesome'
 import faUndo from '@fortawesome/fontawesome-free-solid/faUndo'
 import faFileAlt from '@fortawesome/fontawesome-free-regular/faFileAlt'
 
 const cronjobsService = CronjobsService()
+const podsService = PodsService()
 
 export default {
   data () {
@@ -101,6 +104,27 @@ export default {
     },
     duration (date1, date2) {
       return moment.duration(moment(date1).diff(moment(date2))).asSeconds()
+    },
+    async getLog (cronjob) {
+      try {
+        const logData = await podsService.getLog(cronjob.pod)
+
+        const blob = new Blob([logData], { type: 'text/plain' })
+        const link = document.createElement('a')
+
+        const dateFormat = 'DDMMYYYY_HH_mm_ss'
+        // prettier-ignore
+        const dateFormatted = moment(cronjob.latestExecution, 'DD/MM/YYYY HH:mm:ss')
+          .format(dateFormat)
+
+        link.href = window.URL.createObjectURL(blob)
+        link.target = '_blank'
+        link.download = `${cronjob.name}_${dateFormatted}.log`
+
+        link.click()
+      } catch (err) {
+        console.log(err)
+      }
     },
   },
   computed: {

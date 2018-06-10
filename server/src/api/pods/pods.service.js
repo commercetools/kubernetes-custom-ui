@@ -8,5 +8,12 @@ export default ({ k8sClient }) => {
       qs: params,
     });
 
+  service.getLog = async name =>
+    k8sClient({
+      url: `/api/v1/namespaces/default/pods/${name}/log`,
+      method: 'GET',
+      json: false,
+    });
+
   return service;
 };
