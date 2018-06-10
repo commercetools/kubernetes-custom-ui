@@ -6,7 +6,7 @@ export default ({ authService, host }) => async params => {
       return authService.getAccessToken().then(res => res.token);
     }
 
-    return '';
+    return Promise.resolve('');
   };
 
   return request({

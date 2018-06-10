@@ -19,3 +19,11 @@ export class CommercetoolsError extends Error {
     this.originalError = err;
   }
 }
+
+export class K8sError extends Error {
+  constructor(err) {
+    super(err.message || 'kubernetes error');
+    this.code = err.statusCode;
+    this.originalError = err;
+  }
+}
