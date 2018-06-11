@@ -1,4 +1,5 @@
-import { curry } from 'lodash/fp';
+import { curry, compose, map, orderBy } from 'lodash/fp';
+import cronParser from 'cron-parser';
 import { ValidationError } from '../../errors';
 
 export default ({ cronjobsService, jobsService, podsService }) => {
@@ -36,27 +37,38 @@ export default ({ cronjobsService, jobsService, podsService }) => {
     };
   };
 
+  const getCronjobResult = curry((jobs, pods, cronjob) => {
+    const latestJob = jobs.items.filter(isChild(cronjob.metadata.name)).reduce(getLatestJob);
+    const latestJobPod = pods.items.filter(isChild(latestJob.metadata.name))[0];
+
+    return {
+      status: latestJobPod.status.phase,
+      pod: latestJobPod.metadata.name,
+      name: cronjob.metadata.name,
+      schedule: cronjob.spec.schedule,
+      latestExecution: latestJob.status.startTime,
+      completionTime: latestJob.status.completionTime,
+      nextExecution: cronParser
+        .parseExpression(cronjob.spec.schedule)
+        .next()
+        .toString(),
+    };
+  });
+
   controller.find = async (req, res, next) => {
     try {
+      const { sortBy, sortDirection } = req.query;
+
       const [cronjobs, jobs, pods] = await Promise.all([
         cronjobsService.find(),
         jobsService.find(),
         podsService.find(),
       ]);
 
-      return res.json(cronjobs.items.map(cronjob => {
-        const latestJob = jobs.items.filter(isChild(cronjob.metadata.name)).reduce(getLatestJob);
-        const latestJobPod = pods.items.filter(isChild(latestJob.metadata.name))[0];
-
-        return {
-          status: latestJobPod.status.phase,
-          pod: latestJobPod.metadata.name,
-          name: cronjob.metadata.name,
-          schedule: cronjob.spec.schedule,
-          latestExecution: latestJob.status.startTime,
-          completionTime: latestJob.status.completionTime,
-        };
-      }));
+      return res.json(compose(
+        orderBy(sortBy, sortDirection),
+        map(getCronjobResult(jobs, pods)),
+      )(cronjobs.items));
     } catch (err) {
       next(err);
     }

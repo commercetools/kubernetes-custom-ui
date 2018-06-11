@@ -14,11 +14,11 @@
               cellspacing="0" width="100%">
               <thead>
                 <tr>
-                  <th>Status</th>
-                  <th>Cronjob</th>
+                  <sortable-header :sortBy="sortBy" :header="{ value: 'status', label: 'Status'}" @sort="onSorted"></sortable-header>
+                  <sortable-header :sortBy="sortBy" :header="{ value: 'name', label: 'Cronjob'}" @sort="onSorted"></sortable-header>
                   <th>Schedule</th>
-                  <th>Last</th>
-                  <th>Next</th>
+                  <sortable-header :sortBy="sortBy" :header="{ value: 'latestExecution', label: 'Last'}" @sort="onSorted"></sortable-header>
+                  <sortable-header :sortBy="sortBy" :header="{ value: 'nextExecution', label: 'Next'}" @sort="onSorted"></sortable-header>
                   <th></th>
                 </tr>
               </thead>
@@ -41,7 +41,7 @@
                       <font-awesome-icon :icon="faFileAlt" />
                     </a>
                   </td>
-                  <td>{{cronjob.next}}</td>
+                  <td>{{cronjob.nextExecution}}</td>
                   <td>
                     <button type="submit" class="btn btn-primary btn-sm"
                       @click.prevent="run(cronjob)"
@@ -59,13 +59,13 @@
 
 <script>
 import cronstrue from 'cronstrue'
-import cronParser from 'cron-parser'
 import moment from 'moment'
 import CronjobsService from '@/services/cronjobs'
 import PodsService from '@/services/pods'
 import FontAwesomeIcon from '@fortawesome/vue-fontawesome'
 import faUndo from '@fortawesome/fontawesome-free-solid/faUndo'
 import faFileAlt from '@fortawesome/fontawesome-free-regular/faFileAlt'
+import SortableHeader from '@/components/Table/SortableHeader'
 
 const cronjobsService = CronjobsService()
 const podsService = PodsService()
@@ -74,6 +74,10 @@ export default {
   data() {
     return {
       cronjobs: [],
+      sortBy: {
+        field: 'name',
+        ascending: true,
+      },
     }
   },
   created() {
@@ -86,7 +90,10 @@ export default {
     async getCronjobs() {
       try {
         this.$Progress.start()
-        this.cronjobs = await cronjobsService.find()
+        this.cronjobs = await cronjobsService.find({
+          sortBy: this.sortBy.field,
+          sortDirection: this.sortBy.ascending ? 'asc' : 'desc',
+        })
         this.$Progress.finish()
       } catch (err) {
         this.$notify({ type: 'error', text: err.message })
@@ -138,6 +145,11 @@ export default {
         this.$notify({ type: 'error', text: err.message })
       }
     },
+    onSorted(field) {
+      const ascending = field === this.sortBy.field ? !this.sortBy.ascending : false
+      this.sortBy = { field, ascending }
+      this.getCronjobs()
+    },
   },
   computed: {
     cronjobsFormatted() {
@@ -148,10 +160,7 @@ export default {
           ? this.duration(cronjob.completionTime, cronjob.latestExecution)
           : '-',
         // prettier-ignore
-        next: this.formatDate(cronParser
-          .parseExpression(cronjob.schedule)
-          .next()
-          .toString()),
+        nextExecution: this.formatDate(cronjob.nextExecution),
         schedule: cronstrue.toString(cronjob.schedule),
       }))
     },
@@ -164,6 +173,7 @@ export default {
   },
   components: {
     FontAwesomeIcon,
+    SortableHeader,
   },
 }
 </script>
