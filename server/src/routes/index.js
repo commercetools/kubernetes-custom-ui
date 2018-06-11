@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import path from 'path';
 import Cronjobs from '../api/cronjobs';
 import Pods from '../api/pods';
 import Auth from '../api/auth';
@@ -19,8 +20,13 @@ export default ({ app, container }) => {
 
   // Probes
   app.use('/health', (req, res) => res.send('OK'));
-  app.use('/isready', (req, res) => res.send('OK')); // Provisional until we define when to consider the server is ready
+  app.use('/ready', (req, res) => res.send('OK'));
 
-  // Here I will add the routes for serving the client static files (assets)
-  // and the error routes (404) for api/assets urls
+  // API calls to not defined routes will return 404 error
+  app.route('/api/*').get((req, res) => res.sendStatus(404));
+
+  // All other routes should redirect to the index.html
+  app.route('/*').get((req, res) => {
+    res.sendFile(path.resolve(__dirname, '../../../client/dist/index.html'));
+  });
 };
