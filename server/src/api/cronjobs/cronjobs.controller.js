@@ -46,12 +46,14 @@ export default ({ cronjobsService, jobsService, podsService }) => {
       pod: latestJobPod.metadata.name,
       name: cronjob.metadata.name,
       schedule: cronjob.spec.schedule,
-      latestExecution: latestJob.status.startTime,
-      completionTime: latestJob.status.completionTime,
+      latestExecution: latestJob.status.startTime ?
+        new Date(latestJob.status.startTime).toISOString() : null,
+      completionTime: latestJob.status.completionTime ?
+        new Date(latestJob.status.completionTime).toISOString() : null,
       nextExecution: cronParser
         .parseExpression(cronjob.spec.schedule)
         .next()
-        .toString(),
+        .toISOString(),
     };
   });
 

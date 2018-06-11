@@ -2,6 +2,7 @@ import CronjobsController from '../cronjobs.controller';
 import CronjobsService from '../cronjobs.service';
 import JobsService from '../../jobs/jobs.service';
 import PodsService from '../../pods/pods.service';
+import { ValidationError } from '../../../errors';
 
 describe('Cronjobs controller', () => {
   let cronjobsService;
@@ -19,9 +20,12 @@ describe('Cronjobs controller', () => {
     jobsService = JobsService({ k8sClient });
     podsService = PodsService({ k8sClient });
     cronjobsController = CronjobsController({ cronjobsService, jobsService, podsService });
-    req = {};
+    req = {
+      query: {},
+    };
     res = {
       json: jest.fn(),
+      send: jest.fn(),
     };
     next = jest.fn();
   });
@@ -32,7 +36,7 @@ describe('Cronjobs controller', () => {
     let podList;
 
     describe('when success', () => {
-      beforeEach(() => {
+      beforeEach(async () => {
         cronjobList = {
           items: [
             {
@@ -146,8 +150,9 @@ describe('Cronjobs controller', () => {
         cronjobsService.find = jest.fn().mockResolvedValue(cronjobList);
         jobsService.find = jest.fn().mockResolvedValue(jobList);
         podsService.find = jest.fn().mockResolvedValue(podList);
+        Date.now = jest.fn().mockReturnValue('1982-02-11T00:00:00.000Z');
 
-        cronjobsController.find(req, res, next);
+        await cronjobsController.find(req, res, next);
       });
 
       it('should call the cronjobsService to get the cronjob list', () =>
@@ -166,16 +171,18 @@ describe('Cronjobs controller', () => {
             pod: podList.items[1].metadata.name,
             name: cronjobList.items[0].metadata.name,
             schedule: cronjobList.items[0].spec.schedule,
-            latestExecution: jobList.items[1].status.startTime,
-            completionTime: jobList.items[1].status.completionTime,
+            latestExecution: new Date(jobList.items[1].status.startTime).toISOString(),
+            completionTime: new Date(jobList.items[1].status.completionTime).toISOString(),
+            nextExecution: '1982-02-11T00:15:00.000Z', // 15 minutes later than now
           },
           {
             status: podList.items[2].status.phase,
             pod: podList.items[2].metadata.name,
             name: cronjobList.items[1].metadata.name,
             schedule: cronjobList.items[1].spec.schedule,
-            latestExecution: jobList.items[2].status.startTime,
-            completionTime: jobList.items[2].status.completionTime,
+            latestExecution: new Date(jobList.items[2].status.startTime).toISOString(),
+            completionTime: new Date(jobList.items[2].status.completionTime).toISOString(),
+            nextExecution: '1982-02-11T00:05:00.000Z', // 5 minutes later than now
           },
         ]));
     });
@@ -192,6 +199,113 @@ describe('Cronjobs controller', () => {
 
       it('should pass down the error', () =>
         expect(next).toHaveBeenCalledWith(new Error('Internal Server Error')));
+    });
+  });
+  describe('when running manually', () => {
+    beforeEach(() => {
+      req.params = {
+        name: 'dummy-cronjob-1',
+      };
+    });
+
+    describe('when success', () => {
+      let cronjobList;
+
+      beforeEach(async () => {
+        cronjobList = {
+          apiVersion: 'batch/v1beta1',
+          items: [
+            {
+              metadata: {
+                name: 'dummy-cronjob-1',
+                namespace: 'default',
+                labels: {
+                  release: 'dummy-cronjob-1',
+                },
+                uid: 'dummy-uid',
+              },
+              spec: {
+                schedule: '*/15 * * * *',
+                jobTemplate: {
+                  spec: {
+                    containers: [{
+                      image: 'dummy-image',
+                    }],
+                  },
+                },
+              },
+            },
+          ],
+        };
+
+        cronjobsService.find = jest.fn().mockResolvedValue(cronjobList);
+        jobsService.create = jest.fn();
+        Date.now = jest.fn().mockReturnValue('1000');
+
+        await cronjobsController.run(req, res, next);
+      });
+
+      it('should call the cronjobsService to get the cronjobs list filtered by name', () =>
+        expect(cronjobsService.find).toHaveBeenCalledWith({
+          fieldSelector: `metadata.name=${req.params.name}`,
+        }));
+
+      it('should create the job based on the cronjob template', () => {
+        const expectedCronjob = cronjobList.items[0];
+
+        expect(jobsService.create).toHaveBeenCalledWith({
+          metadata: {
+            name: `${expectedCronjob.metadata.name}-manual-${Math.floor(Date.now() / 1000)}`,
+            namespace: expectedCronjob.metadata.namespace,
+            labels: expectedCronjob.metadata.labels,
+            ownerReferences: [
+              {
+                apiVersion: cronjobList.apiVersion,
+                kind: 'CronJob',
+                name: expectedCronjob.metadata.name,
+                uid: expectedCronjob.metadata.uid,
+              },
+            ],
+          },
+          spec: expectedCronjob.spec.jobTemplate.spec,
+        });
+      });
+
+      it('should return "success"', () =>
+        expect(res.send).toHaveBeenCalledWith('success'));
+    });
+    describe('when errors', () => {
+      describe("when the cronjob doesn't exist", () => {
+        beforeEach(async () => {
+          cronjobsService.find = jest
+            .fn()
+            .mockResolvedValue({
+              apiVersion: 'batch/v1beta1',
+              items: [],
+            });
+
+          await cronjobsController.run(req, res, next);
+        });
+
+        it('should not return a successful response', () => expect(res.send).not.toHaveBeenCalledWith('success'));
+
+        it('should pass down a ValidationError', () =>
+          expect(next).toHaveBeenCalledWith(new ValidationError("the cronjob doesn't exist")));
+      });
+      describe('when unexpected error', () => {
+        beforeEach(async () => {
+          cronjobsService.find = jest
+            .fn()
+            .mockRejectedValue(new Error('Internal Server Error'));
+
+          await cronjobsController.run(req, res, next);
+        });
+
+        it('should not return a successful response', () => expect(res.send).not.toHaveBeenCalledWith('success'));
+
+        it('should pass down the error', () =>
+          expect(next).toHaveBeenCalledWith(new Error('Internal Server Error')));
+      });
     });
   });
 });
