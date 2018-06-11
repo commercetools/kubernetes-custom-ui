@@ -31,7 +31,7 @@
                 <input id="email" type="email" class="form-control"
                   name="email" v-model.trim="email" required >
               </div>
-              
+
               <div class="row">
                  <div class="form-group col-md-6">
                 <label for="password">Password</label>
@@ -53,8 +53,8 @@
               </div>
 
               <div class="mt-3 text-center">
-                Already have an account? 
-                <router-link :to="{ name: 'Home' }">Login</router-link>  
+                Already have an account?
+                <router-link :to="{ name: 'Home' }">Login</router-link>
               </div>
 
               <div class="error-message mt-3 text-center text-danger" v-show="errorMessage">
@@ -75,7 +75,7 @@
 import { mapActions } from 'vuex'
 
 export default {
-  data() {
+  data () {
     return {
       firstName: '',
       lastName: '',
@@ -86,7 +86,7 @@ export default {
     }
   },
   methods: {
-    signUp() {
+    signUp () {
       if (this.allDataFullfilled()) {
         if (this.passwordsMatch()) {
           this.errorMessage = ''
@@ -102,29 +102,27 @@ export default {
               this.$Progress.finish()
               this.$router.push({ name: 'Dashboard' })
             })
-            .catch(err => {
+            .catch((err) => {
               this.$Progress.finish()
               this.handleError(err)
             })
-        } else {
-          this.errorMessage = '"Password" and "Confirm password" fields don\'t match'
-          return Promise.resolve()
         }
-      } else return Promise.resolve()
+        this.errorMessage = '"Password" and "Confirm password" fields don\'t match'
+        return Promise.resolve()
+      } return Promise.resolve()
     },
-    allDataFullfilled() {
+    allDataFullfilled () {
       return this.firstName && this.lastName && this.email && this.password && this.confirmPassword
     },
-    passwordsMatch() {
+    passwordsMatch () {
       return this.password === this.confirmPassword
     },
-    handleError(err) {
+    handleError (err) {
       if (err.response.status === 400)
         if (
           err.response.data.errors &&
-          err.response.data.errors.some(
-            errorDetail => errorDetail.code === 'DuplicateField' && errorDetail.field === 'email',
-          )
+          err.response.data.errors.some(errorDetail =>
+            errorDetail.code === 'DuplicateField' && errorDetail.field === 'email')
         ) {
           this.errorMessage = `There is already a user with email "${this.email}"`
         } else this.errorMessage = err.response.data.message

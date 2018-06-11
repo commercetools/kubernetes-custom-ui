@@ -33,7 +33,7 @@
           <router-link :to="{ name: 'Cronjobs' }" class="sidebar-link">
             <font-awesome-icon :icon="faClock" />
             <span class="title">Cronjobs</span>
-          </router-link>  
+          </router-link>
         </li>
       </ul>
     </div>
@@ -48,16 +48,16 @@ import faClock from '@fortawesome/fontawesome-free-solid/faClock'
 
 export default {
   methods: {
-    setCollapse() {
+    setCollapse () {
       this.SET_IS_SIDEBAR_COLLAPSED(!this.isSidebarCollapsed)
     },
     ...mapMutations('general', ['SET_IS_SIDEBAR_COLLAPSED']),
   },
   computed: {
-    faArrowAltCircleLeft() {
+    faArrowAltCircleLeft () {
       return faArrowAltCircleLeft
     },
-    faClock() {
+    faClock () {
       return faClock
     },
     ...mapState('general', ['isSidebarCollapsed']),

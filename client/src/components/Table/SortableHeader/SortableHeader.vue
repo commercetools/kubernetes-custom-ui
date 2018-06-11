@@ -20,14 +20,14 @@ export default {
       required: true,
     },
   },
-  data() {
+  data () {
     return {}
   },
   methods: {
-    getIcon(isAscending) {
+    getIcon (isAscending) {
       return isAscending ? faSortUp : faSortDown
     },
-    sort(value) {
+    sort (value) {
       this.$emit('sort', value)
     },
   },

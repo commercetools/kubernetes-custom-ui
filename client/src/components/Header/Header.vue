@@ -29,21 +29,21 @@ import faSignOutAlt from '@fortawesome/fontawesome-free-solid/faSignOutAlt'
 
 export default {
   methods: {
-    signOut() {
+    signOut () {
       this.SIGN_OUT()
       this.$router.push({ name: 'Home' })
     },
-    setCollapse() {
+    setCollapse () {
       this.SET_IS_SIDEBAR_COLLAPSED(!this.isSidebarCollapsed)
     },
     ...mapActions('authentication', ['SIGN_OUT']),
     ...mapMutations('general', ['SET_IS_SIDEBAR_COLLAPSED']),
   },
   computed: {
-    faBars() {
+    faBars () {
       return faBars
     },
-    faSignOutAlt() {
+    faSignOutAlt () {
       return faSignOutAlt
     },
     ...mapState('general', ['isSidebarCollapsed']),

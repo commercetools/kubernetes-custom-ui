@@ -31,7 +31,7 @@
 
               <div class="mt-3 text-center">
                 Don't have an account?
-                <router-link :to="{ name: 'SignUp' }">Create One</router-link>  
+                <router-link :to="{ name: 'SignUp' }">Create One</router-link>
               </div>
 
               <div class="error-message mt-3 text-center text-danger" v-show="errorMessage">
@@ -49,11 +49,10 @@
 </template>
 
 <script>
-import Vue from 'vue'
 import { mapActions } from 'vuex'
 
 export default {
-  data() {
+  data () {
     return {
       email: '',
       password: '',
@@ -61,7 +60,7 @@ export default {
     }
   },
   methods: {
-    signIn() {
+    signIn () {
       if (this.email && this.password) {
         this.$Progress.start()
         this.errorMessage = ''
@@ -71,7 +70,7 @@ export default {
             this.$Progress.finish()
             this.$router.push({ name: 'Dashboard' })
           })
-          .catch(err => {
+          .catch((err) => {
             this.$Progress.finish()
             this.handleError(err)
           })
@@ -79,7 +78,7 @@ export default {
 
       return Promise.resolve()
     },
-    handleError(err) {
+    handleError (err) {
       if (err.response.status === 401) this.errorMessage = 'Invalid email or password'
       else this.errorMessage = 'Opsss, something went wrong. Please contact the administrator'
     },

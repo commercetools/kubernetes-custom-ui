@@ -14,11 +14,27 @@
               cellspacing="0" width="100%">
               <thead>
                 <tr>
-                  <sortable-header :sortBy="sortBy" :header="{ value: 'status', label: 'Status'}" @sort="onSorted"></sortable-header>
-                  <sortable-header :sortBy="sortBy" :header="{ value: 'name', label: 'Cronjob'}" @sort="onSorted"></sortable-header>
+                  <sortable-header
+                    :sortBy="sortBy"
+                    :header="{ value: 'status', label: 'Status'}"
+                    @sort="onSorted">
+                  </sortable-header>
+                  <sortable-header
+                    :sortBy="sortBy"
+                    :header="{ value: 'name', label: 'Cronjob'}"
+                    @sort="onSorted">
+                  </sortable-header>
                   <th>Schedule</th>
-                  <sortable-header :sortBy="sortBy" :header="{ value: 'latestExecution', label: 'Last'}" @sort="onSorted"></sortable-header>
-                  <sortable-header :sortBy="sortBy" :header="{ value: 'nextExecution', label: 'Next'}" @sort="onSorted"></sortable-header>
+                  <sortable-header
+                    :sortBy="sortBy"
+                    :header="{ value: 'latestExecution', label: 'Last'}"
+                    @sort="onSorted">
+                  </sortable-header>
+                  <sortable-header
+                    :sortBy="sortBy"
+                    :header="{ value: 'nextExecution', label: 'Next'}"
+                    @sort="onSorted">
+                  </sortable-header>
                   <th></th>
                 </tr>
               </thead>
@@ -71,7 +87,7 @@ const cronjobsService = CronjobsService()
 const podsService = PodsService()
 
 export default {
-  data() {
+  data () {
     return {
       cronjobs: [],
       sortBy: {
@@ -80,14 +96,14 @@ export default {
       },
     }
   },
-  created() {
+  created () {
     this.getCronjobs()
   },
   methods: {
-    getRandom(threshold) {
+    getRandom (threshold) {
       return Math.floor(Math.random() * threshold)
     },
-    async getCronjobs() {
+    async getCronjobs () {
       try {
         this.$Progress.start()
         this.cronjobs = await cronjobsService.find({
@@ -99,21 +115,21 @@ export default {
         this.$notify({ type: 'error', text: err.message })
       }
     },
-    statusClass(status) {
+    statusClass (status) {
       if (status === 'Succeeded') return 'bgc-green-50 c-green-700'
       else if (this.isRunning(status)) return 'bgc-orange-50 c-orange-700'
       return 'bgc-red-50 c-red-700'
     },
-    isRunning(status) {
+    isRunning (status) {
       return status === 'Running' || status === 'Pending'
     },
-    formatDate(date) {
+    formatDate (date) {
       return date ? moment(date).format('DD/MM/YYYY HH:mm:ss') : '-'
     },
-    duration(date1, date2) {
+    duration (date1, date2) {
       return moment.duration(moment(date1).diff(moment(date2))).asSeconds()
     },
-    async getLog(cronjob) {
+    async getLog (cronjob) {
       try {
         const logData = await podsService.getLog(cronjob.pod)
 
@@ -121,7 +137,6 @@ export default {
         const link = document.createElement('a')
 
         const dateFormat = 'DDMMYYYY_HH_mm_ss'
-        // prettier-ignore
         const dateFormatted = moment(cronjob.latestExecution, 'DD/MM/YYYY HH:mm:ss')
           .format(dateFormat)
 
@@ -134,7 +149,7 @@ export default {
         this.$notify({ type: 'error', text: err.message })
       }
     },
-    async run(cronjob) {
+    async run (cronjob) {
       try {
         await cronjobsService.run(cronjob.name)
         this.$notify({
@@ -145,29 +160,28 @@ export default {
         this.$notify({ type: 'error', text: err.message })
       }
     },
-    onSorted(field) {
+    onSorted (field) {
       const ascending = field === this.sortBy.field ? !this.sortBy.ascending : false
       this.sortBy = { field, ascending }
       this.getCronjobs()
     },
   },
   computed: {
-    cronjobsFormatted() {
+    cronjobsFormatted () {
       return this.cronjobs.map(cronjob => ({
         ...cronjob,
         latestExecution: this.formatDate(cronjob.latestExecution),
         executionTime: cronjob.completionTime
           ? this.duration(cronjob.completionTime, cronjob.latestExecution)
           : '-',
-        // prettier-ignore
         nextExecution: this.formatDate(cronjob.nextExecution),
         schedule: cronstrue.toString(cronjob.schedule),
       }))
     },
-    faUndo() {
+    faUndo () {
       return faUndo
     },
-    faFileAlt() {
+    faFileAlt () {
       return faFileAlt
     },
   },
