@@ -20,8 +20,8 @@ const authentication = Authentication({
   authStore,
   utilsAuthentication,
 })
-const httpClient = HttpClient({ authStore })
 const router = Router({ authentication })
+const httpClient = HttpClient({ authStore, router })
 
 Vue.use(BootstrapVue)
 Vue.use(VueProgressBar, { color: '#3371e3', failedColor: 'red', thickness: '2px' })

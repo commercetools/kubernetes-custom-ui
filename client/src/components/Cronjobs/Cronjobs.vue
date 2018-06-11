@@ -113,6 +113,7 @@ export default {
         this.$Progress.finish()
       } catch (err) {
         this.$notify({ type: 'error', text: err.message })
+        this.$Progress.finish()
       }
     },
     statusClass (status) {

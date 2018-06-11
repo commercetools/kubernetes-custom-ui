@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-export default ({ authStore }) => ({
+export default ({ authStore, router }) => ({
   install: () => {
     axios.interceptors.request.use(
       config => ({
@@ -12,6 +12,15 @@ export default ({ authStore }) => ({
         },
       }),
       error => Promise.reject(error),
+    )
+    axios.interceptors.response.use(
+      response => response,
+      (error) => {
+        if (error.response.status === 401)
+          router.push({ name: 'Home' })
+
+        return Promise.reject(error)
+      },
     )
   },
 })
