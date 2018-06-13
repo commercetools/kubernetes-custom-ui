@@ -106,7 +106,7 @@ describe('Auth controller', () => {
 
         usersService.create = jest.fn().mockReturnValue(Promise.resolve(newUser));
 
-        authController.signUp(req, res);
+        await authController.signUp(req, res);
       });
 
       it('should create the user', () =>
