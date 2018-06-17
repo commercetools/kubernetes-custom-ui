@@ -13,10 +13,24 @@ export default ({ cronjobsService, jobsService, podsService }) => {
     return false;
   });
 
-  const getLatestJob = (job1, job2) =>
-    (new Date(job1.status.startTime).getTime() > new Date(job2.status.startTime).getTime()
-      ? job1
-      : job2);
+  const getLatestJob = (job1, job2) => {
+    if (job1) {
+      if (job2) {
+        return new Date(job1.status.startTime).getTime() > new Date(job2.status.startTime).getTime()
+          ? job1
+          : job2;
+      }
+
+      return job1;
+    }
+
+    if (job2) {
+      return job2;
+    }
+
+    return null;
+  };
+
 
   const getJobDraftFromCronjob = (cronjob, apiVersion) => {
     return {
@@ -38,17 +52,17 @@ export default ({ cronjobsService, jobsService, podsService }) => {
   };
 
   const getCronjobResult = curry((jobs, pods, cronjob) => {
-    const latestJob = jobs.items.filter(isChild(cronjob.metadata.name)).reduce(getLatestJob);
-    const latestJobPod = pods.items.filter(isChild(latestJob.metadata.name))[0];
+    const latestJob = jobs.items.filter(isChild(cronjob.metadata.name)).reduce(getLatestJob, null);
+    const latestJobPod = latestJob ? pods.items.filter(isChild(latestJob.metadata.name))[0] : null;
 
     return {
-      status: latestJobPod.status.phase,
-      pod: latestJobPod.metadata.name,
+      status: latestJobPod ? latestJobPod.status.phase : null,
+      pod: latestJobPod ? latestJobPod.metadata.name : null,
       name: cronjob.metadata.name,
       schedule: cronjob.spec.schedule,
-      latestExecution: latestJob.status.startTime ?
+      latestExecution: latestJob && latestJob.status.startTime ?
         new Date(latestJob.status.startTime).toISOString() : null,
-      completionTime: latestJob.status.completionTime ?
+      completionTime: latestJob && latestJob.status.completionTime ?
         new Date(latestJob.status.completionTime).toISOString() : null,
       nextExecution: cronParser
         .parseExpression(cronjob.spec.schedule)

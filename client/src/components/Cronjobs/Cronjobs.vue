@@ -42,20 +42,25 @@
                 <tr v-for="cronjob in cronjobsFormatted" :key="cronjob.id">
                   <td>
                     <span class="badge p-15 lh-0 tt-c" :class="statusClass(cronjob.status)">
-                      {{cronjob.status}}
+                      {{cronjob.status || 'None'}}
                     </span>
                   </td>
                   <td>{{cronjob.name}}</td>
                   <td>{{cronjob.schedule}}</td>
                   <td>
-                    {{cronjob.latestExecution}}
-                    <span class="badge p-10 lh-0 tt-c bgc-blue-50 c-blue-700">
-                      ({{cronjob.executionTime}} sec)
-                    </span>
-                    <a href="" @click.prevent="getLog(cronjob)"
-                      class="pL-10" v-show="!isRunning(cronjob.status)">
-                      <font-awesome-icon :icon="faFileAlt" />
-                    </a>
+                    <template v-if="cronjob.latestExecution">
+                      {{cronjob.latestExecution}}
+                      <span class="badge p-10 lh-0 tt-c bgc-blue-50 c-blue-700">
+                        ({{cronjob.executionTime || '-' }} sec)
+                      </span>
+                      <a href="" @click.prevent="getLog(cronjob)"
+                        class="pL-10" v-show="!isRunning(cronjob.status)">
+                        <font-awesome-icon :icon="faFileAlt" />
+                      </a>
+                    </template>
+                    <template v-else >
+                      No information
+                    </template>
                   </td>
                   <td>{{cronjob.nextExecution}}</td>
                   <td>
@@ -118,14 +123,14 @@ export default {
     },
     statusClass (status) {
       if (status === 'Succeeded') return 'bgc-green-50 c-green-700'
-      else if (this.isRunning(status)) return 'bgc-orange-50 c-orange-700'
+      else if (this.isRunning(status) || !status) return 'bgc-orange-50 c-orange-700'
       return 'bgc-red-50 c-red-700'
     },
     isRunning (status) {
       return status === 'Running' || status === 'Pending'
     },
     formatDate (date) {
-      return date ? moment(date).format('DD/MM/YYYY HH:mm:ss') : '-'
+      return moment(date).format('DD/MM/YYYY HH:mm:ss')
     },
     duration (date1, date2) {
       return moment.duration(moment(date1).diff(moment(date2))).asSeconds()
@@ -171,10 +176,11 @@ export default {
     cronjobsFormatted () {
       return this.cronjobs.map(cronjob => ({
         ...cronjob,
-        latestExecution: this.formatDate(cronjob.latestExecution),
+        status: cronjob.status,
+        latestExecution: cronjob.latestExecution ? this.formatDate(cronjob.latestExecution) : null,
         executionTime: cronjob.completionTime
           ? this.duration(cronjob.completionTime, cronjob.latestExecution)
-          : '-',
+          : null,
         nextExecution: this.formatDate(cronjob.nextExecution),
         schedule: cronstrue.toString(cronjob.schedule),
       }))
