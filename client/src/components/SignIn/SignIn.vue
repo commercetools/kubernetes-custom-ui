@@ -29,11 +29,6 @@
                 </button>
               </div>
 
-              <div class="mt-3 text-center">
-                Don't have an account?
-                <router-link :to="{ name: 'SignUp' }">Create One</router-link>
-              </div>
-
               <div class="error-message mt-3 text-center text-danger" v-show="errorMessage">
                 <h6>{{errorMessage}}</h6>
               </div>

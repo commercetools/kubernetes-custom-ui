@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 import SignIn from '@/components/SignIn'
-import SignUp from '@/components/SignUp'
+// import SignUp from '@/components/SignUp'
 import Cronjobs from '@/components/Cronjobs'
 import Dashboard from '@/components/Dashboard'
 
@@ -37,11 +37,6 @@ export default ({ authentication }) => {
         path: '/',
         name: 'Home',
         component: SignIn,
-      },
-      {
-        path: '/signup',
-        name: 'SignUp',
-        component: SignUp,
       },
       {
         path: '/dashboard',
