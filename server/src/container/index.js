@@ -73,7 +73,7 @@ export default function () {
       if (provider === 'GOOGLE_CLOUD') {
         authService = GoogleCloudService({
           clientEmail: config.get('KUBERNETES:PROVIDERS:GOOGLE_CLOUD:CLIENT_EMAIL'),
-          privateKey: config.get('KUBERNETES:PROVIDERS:GOOGLE_CLOUD:PRIVATE_KEY'),
+          privateKey: config.get('KUBERNETES:PROVIDERS:GOOGLE_CLOUD:PRIVATE_KEY').replace(/\\n/g, '\n'),
         });
       }
     }
