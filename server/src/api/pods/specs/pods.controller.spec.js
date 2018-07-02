@@ -5,13 +5,22 @@ describe('Pods controller', () => {
   let podsService;
   let podsController;
   let k8sClient;
+  let environments;
   let req;
   let res;
   let next;
 
   beforeEach(() => {
     k8sClient = {};
-    podsService = PodsService({ k8sClient });
+    environments = [
+      {
+        key: 'test',
+        name: 'test environment',
+        host: 'http://test.com',
+        namespaces: ['default', 'test'],
+      },
+    ];
+    podsService = PodsService({ k8sClient, environments });
     podsController = PodsController({ podsService });
     req = {};
     res = {
@@ -26,6 +35,10 @@ describe('Pods controller', () => {
         params: {
           name: 'dummy-pod-1',
         },
+        query: {
+          environment: 'test',
+          namespace: 'test',
+        },
       };
     });
 
@@ -37,7 +50,7 @@ describe('Pods controller', () => {
       });
 
       it('should have call the podsService to get the log', () =>
-        expect(podsService.getLog).toHaveBeenCalledWith('dummy-pod-1'));
+        expect(podsService.getLog).toHaveBeenCalledWith('dummy-pod-1', 'test', 'test'));
 
       it('should return the log data', () =>
         expect(res.json).toHaveBeenCalledWith('This is the log data'));

@@ -23,6 +23,23 @@
         "PRIVATE_KEY": "dummy-kubernetes-google-cloud-private-key"
       }
     },
-    "HOST": "dummy-kubernetes-host"
+    "ENVIRONMENTS": {
+      "ENVIRONMENT_ONE": {
+        "LABEL": "dummy-environment-one-label",
+        "HOST": "dummy-environment-one-host",
+        "NAMESPACES": {
+          "DEFAULT": "dummy-environment-one-default",
+          "ANOTHER_NAMESPACE": "dummy-environment-one-another-namespace"
+        }
+      },
+      "ENVIRONMENT_TWO": {
+        "LABEL": "dummy-environment-two-label",
+        "HOST": "dummy-environment-two-host",
+        "NAMESPACES": {
+          "DEFAULT": "dummy-environment-two-default",
+          "ANOTHER_NAMESPACE": "dummy-environment-two-another-namespace"
+        }
+      }
+    }
   }
 }

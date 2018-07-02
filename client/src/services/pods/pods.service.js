@@ -1,5 +1,10 @@
 import axios from 'axios'
 
 export default () => ({
-  getLog: async name => axios.get(`/pods/${name}/log`).then(res => res.data),
+  getLog: async (name, environment, namespace) => axios.get(`/pods/${name}/log`, {
+    params: {
+      environment,
+      namespace,
+    },
+  }).then(res => res.data),
 })

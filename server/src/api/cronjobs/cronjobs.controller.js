@@ -68,23 +68,28 @@ export default ({ cronjobsService, jobsService, podsService }) => {
         .parseExpression(cronjob.spec.schedule)
         .next()
         .toISOString(),
+      namespace: cronjob.metadata.namespace,
     };
   });
 
   controller.find = async (req, res, next) => {
     try {
-      const { sortBy, sortDirection } = req.query;
+      const { environment, sortBy, sortDirection } = req.query;
 
-      const [cronjobs, jobs, pods] = await Promise.all([
-        cronjobsService.find(),
-        jobsService.find(),
-        podsService.find(),
-      ]);
+      if (environment) {
+        const [cronjobs, jobs, pods] = await Promise.all([
+          cronjobsService.find({ environment }),
+          jobsService.find({ environment }),
+          podsService.find({ environment }),
+        ]);
 
-      return res.json(compose(
-        orderBy(sortBy, sortDirection),
-        map(getCronjobResult(jobs, pods)),
-      )(cronjobs.items));
+        return res.json(compose(
+          orderBy(sortBy, sortDirection),
+          map(getCronjobResult(jobs, pods)),
+        )(cronjobs.items));
+      }
+
+      throw new ValidationError('"environment" query param is required');
     } catch (err) {
       next(err);
     }
@@ -92,15 +97,17 @@ export default ({ cronjobsService, jobsService, podsService }) => {
 
   controller.run = async (req, res, next) => {
     const { name } = req.params;
+    const { environment, namespace } = req.body;
 
     try {
       const cronjobList = await cronjobsService.find({
-        fieldSelector: `metadata.name=${name}`,
+        fieldSelector: `metadata.name=${name},metadata.namespace=${namespace}`,
+        environment,
       });
 
       if (cronjobList.items.length) {
         const jobDraft = getJobDraftFromCronjob(cronjobList.items[0], cronjobList.apiVersion);
-        await jobsService.create(jobDraft);
+        await jobsService.create(jobDraft, environment, namespace);
         return res.send('success');
       }
 

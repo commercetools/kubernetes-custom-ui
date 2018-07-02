@@ -7,5 +7,8 @@ export default () => ({
         params,
       })
       .then(res => res.data),
-  run: async name => axios.post(`/cronjobs/${name}/run`).then(res => res.data),
+  run: async (name, environment, namespace) => axios.post(`/cronjobs/${name}/run`, {
+    environment,
+    namespace,
+  }).then(res => res.data),
 })

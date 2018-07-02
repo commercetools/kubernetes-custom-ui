@@ -1,5 +1,5 @@
 import path from 'path';
-import { createContainer, asFunction, Lifetime } from 'awilix';
+import { createContainer, asFunction, asValue, Lifetime } from 'awilix';
 import Config from '../config';
 import Logger from '../logger';
 import AuthController from '../api/auth/auth.controller';
@@ -80,8 +80,23 @@ export default function () {
 
     return {
       authService,
-      host: config.get('KUBERNETES:HOST'),
     };
+  };
+
+  const getEnvironments = _container => {
+    const config = _container.resolve('config');
+    const environments = config.get('KUBERNETES:ENVIRONMENTS');
+
+    const envs = Object.entries(environments).map(([key, value]) => {
+      return {
+        key: key.toLowerCase(),
+        name: value.LABEL,
+        host: value.HOST,
+        namespaces: Object.values(value.NAMESPACES),
+      };
+    });
+
+    return envs;
   };
 
   // Registering and auto resolving the dependencies between controllers and services
@@ -108,6 +123,8 @@ export default function () {
     authJwtMiddleware: getSingleton(AuthJwtMiddleware, getJwtMiddlewareParams),
     k8sClient: getSingleton(K8sClient, getK8sClientParams),
   });
+
+  container.register('environments', asValue(getEnvironments(container)));
 
   return container;
 }

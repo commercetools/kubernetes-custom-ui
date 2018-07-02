@@ -79,6 +79,7 @@
 </template>
 
 <script>
+import { mapState } from 'vuex'
 import cronstrue from 'cronstrue'
 import moment from 'moment'
 import CronjobsService from '@/services/cronjobs'
@@ -109,17 +110,19 @@ export default {
       return Math.floor(Math.random() * threshold)
     },
     async getCronjobs () {
-      try {
-        this.$Progress.start()
-        this.cronjobs = await cronjobsService.find({
-          sortBy: this.sortBy.field,
-          sortDirection: this.sortBy.ascending ? 'asc' : 'desc',
-        })
-        this.$Progress.finish()
-      } catch (err) {
-        this.$notify({ type: 'error', text: err.message })
-        this.$Progress.finish()
-      }
+      if (this.environment)
+        try {
+          this.$Progress.start()
+          this.cronjobs = await cronjobsService.find({
+            environment: this.environment,
+            sortBy: this.sortBy.field,
+            sortDirection: this.sortBy.ascending ? 'asc' : 'desc',
+          })
+          this.$Progress.finish()
+        } catch (err) {
+          this.$notify({ type: 'error', text: err.message })
+          this.$Progress.finish()
+        }
     },
     statusClass (status) {
       if (status === 'Succeeded') return 'bgc-green-50 c-green-700'
@@ -137,7 +140,7 @@ export default {
     },
     async getLog (cronjob) {
       try {
-        const logData = await podsService.getLog(cronjob.pod)
+        const logData = await podsService.getLog(cronjob.pod, this.environment, cronjob.namespace)
 
         const blob = new Blob([logData], { type: 'text/plain' })
         const link = document.createElement('a')
@@ -157,7 +160,7 @@ export default {
     },
     async run (cronjob) {
       try {
-        await cronjobsService.run(cronjob.name)
+        await cronjobsService.run(cronjob.name, this.environment, cronjob.namespace)
         this.$notify({
           type: 'success',
           text: 'The job has been scheduled. Please refresh the list after few seconds',
@@ -191,6 +194,10 @@ export default {
     faFileAlt () {
       return faFileAlt
     },
+    ...mapState('general', ['environment']),
+  },
+  watch: {
+    environment: 'getCronjobs',
   },
   components: {
     FontAwesomeIcon,

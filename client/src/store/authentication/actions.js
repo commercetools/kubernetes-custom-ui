@@ -35,6 +35,7 @@ export default ({ authenticationService, utilsAuthentication }) => {
     commit('SET_TOKEN', '')
     commit('SET_TOKEN_EXPIRES_AT', '')
     commit('general/SET_IS_SIDEBAR_COLLAPSED', true, { root: true })
+    commit('general/SET_ENVIRONMENT', '', { root: true })
   }
 
   return actions

@@ -10,15 +10,24 @@ describe('Cronjobs controller', () => {
   let podsService;
   let cronjobsController;
   let k8sClient;
+  let environments;
   let req;
   let res;
   let next;
 
   beforeEach(() => {
     k8sClient = {};
-    cronjobsService = CronjobsService({ k8sClient });
-    jobsService = JobsService({ k8sClient });
-    podsService = PodsService({ k8sClient });
+    environments = [
+      {
+        key: 'test',
+        name: 'test environment',
+        host: 'http://test.com',
+        namespaces: ['default', 'test'],
+      },
+    ];
+    cronjobsService = CronjobsService({ k8sClient, environments });
+    jobsService = JobsService({ k8sClient, environments });
+    podsService = PodsService({ k8sClient, environments });
     cronjobsController = CronjobsController({ cronjobsService, jobsService, podsService });
     req = {
       query: {},
@@ -147,6 +156,12 @@ describe('Cronjobs controller', () => {
           ],
         };
 
+        req = {
+          query: {
+            environment: 'test',
+          },
+        };
+
         cronjobsService.find = jest.fn().mockResolvedValue(cronjobList);
         jobsService.find = jest.fn().mockResolvedValue(jobList);
         podsService.find = jest.fn().mockResolvedValue(podList);
@@ -187,24 +202,48 @@ describe('Cronjobs controller', () => {
         ]));
     });
     describe('when errors', () => {
-      beforeEach(() => {
-        cronjobsService.find = jest
-          .fn()
-          .mockReturnValue(Promise.reject(new Error('Internal Server Error')));
+      describe('when the "environment" query param is not sent', () => {
+        beforeEach(() => {
+          cronjobsController.find(req, res, next);
+        });
 
-        cronjobsController.find(req, res, next);
+        it('should not return the cronjob list', () => expect(res.json).not.toHaveBeenCalled());
+
+        it('should pass down the error', () =>
+          expect(next).toHaveBeenCalledWith(new ValidationError('"environment" query param is required')));
       });
+      describe('when unexpected error', () => {
+        beforeEach(() => {
+          req = {
+            query: {
+              environment: 'test',
+            },
+          };
 
-      it('should not return the cronjob list', () => expect(res.json).not.toHaveBeenCalled());
+          cronjobsService.find = jest
+            .fn()
+            .mockReturnValue(Promise.reject(new Error('Internal Server Error')));
 
-      it('should pass down the error', () =>
-        expect(next).toHaveBeenCalledWith(new Error('Internal Server Error')));
+          cronjobsController.find(req, res, next);
+        });
+
+        it('should not return the cronjob list', () => expect(res.json).not.toHaveBeenCalled());
+
+        it('should pass down the error', () =>
+          expect(next).toHaveBeenCalledWith(new Error('Internal Server Error')));
+      });
     });
   });
   describe('when running manually', () => {
     beforeEach(() => {
-      req.params = {
-        name: 'dummy-cronjob-1',
+      req = {
+        body: {
+          environment: 'test',
+          namespace: 'test',
+        },
+        params: {
+          name: 'dummy-cronjob-1',
+        },
       };
     });
 
@@ -247,28 +286,33 @@ describe('Cronjobs controller', () => {
 
       it('should call the cronjobsService to get the cronjobs list filtered by name', () =>
         expect(cronjobsService.find).toHaveBeenCalledWith({
-          fieldSelector: `metadata.name=${req.params.name}`,
+          fieldSelector: `metadata.name=${req.params.name},metadata.namespace=${req.body.namespace}`,
+          environment: req.body.environment,
         }));
 
-      it('should create the job based on the cronjob template', () => {
+      it('should create the job based on the cronjob template in the selected environment and namespace', () => {
         const expectedCronjob = cronjobList.items[0];
 
-        expect(jobsService.create).toHaveBeenCalledWith({
-          metadata: {
-            name: `${expectedCronjob.metadata.name}-manual-${Math.floor(Date.now() / 1000)}`,
-            namespace: expectedCronjob.metadata.namespace,
-            labels: expectedCronjob.metadata.labels,
-            ownerReferences: [
-              {
-                apiVersion: cronjobList.apiVersion,
-                kind: 'CronJob',
-                name: expectedCronjob.metadata.name,
-                uid: expectedCronjob.metadata.uid,
-              },
-            ],
+        expect(jobsService.create).toHaveBeenCalledWith(
+          {
+            metadata: {
+              name: `${expectedCronjob.metadata.name}-manual-${Math.floor(Date.now() / 1000)}`,
+              namespace: expectedCronjob.metadata.namespace,
+              labels: expectedCronjob.metadata.labels,
+              ownerReferences: [
+                {
+                  apiVersion: cronjobList.apiVersion,
+                  kind: 'CronJob',
+                  name: expectedCronjob.metadata.name,
+                  uid: expectedCronjob.metadata.uid,
+                },
+              ],
+            },
+            spec: expectedCronjob.spec.jobTemplate.spec,
           },
-          spec: expectedCronjob.spec.jobTemplate.spec,
-        });
+          req.body.environment,
+          req.body.namespace,
+        );
       });
 
       it('should return "success"', () =>
