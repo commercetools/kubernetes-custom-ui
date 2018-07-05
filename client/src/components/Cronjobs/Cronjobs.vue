@@ -27,7 +27,18 @@
                   <th>Schedule</th>
                   <sortable-header
                     :sortBy="sortBy"
-                    :header="{ value: 'latestExecution', label: 'Last'}"
+                    :header="{ value: 'latestExecution', label: 'Last start time'}"
+                    @sort="onSorted">
+                  </sortable-header>
+                  <sortable-header
+                    :sortBy="sortBy"
+                    :header="{ value: 'completionTime', label: 'Last end time'}"
+                    @sort="onSorted">
+                  </sortable-header>
+                  <sortable-header
+                    :sortBy="sortBy"
+                    :header="{
+                      value: 'executionTime', label: 'Last total execution time'}"
                     @sort="onSorted">
                   </sortable-header>
                   <sortable-header
@@ -47,20 +58,19 @@
                   </td>
                   <td>{{cronjob.name}}</td>
                   <td>{{cronjob.schedule}}</td>
+                  <td>{{cronjob.latestExecutionStart}}</td>
                   <td>
-                    <template v-if="cronjob.latestExecution">
-                      {{cronjob.latestExecution}}
-                      <span class="badge p-10 lh-0 tt-c bgc-blue-50 c-blue-700">
-                        ({{cronjob.executionTime || '-' }} sec)
-                      </span>
-                      <a href="" @click.prevent="getLog(cronjob)"
-                        class="pL-10" v-show="!isRunning(cronjob.status)">
-                        <font-awesome-icon :icon="faFileAlt" />
-                      </a>
-                    </template>
-                    <template v-else >
-                      No information
-                    </template>
+                    {{cronjob.latestExecutionEnd}}
+                    <a href="" @click.prevent="getLog(cronjob)"
+                      class="pL-10" v-show="cronjob.latestExecutionEnd">
+                      <font-awesome-icon :icon="faFileAlt" />
+                    </a>
+                  </td>
+                  <td>
+                    <span v-show="cronjob.executionTime"
+                      class="badge p-10 lh-0 bgc-blue-50 c-blue-700">
+                      {{preciseDuration(cronjob.executionTime)}}
+                    </span>
                   </td>
                   <td>{{cronjob.nextExecution}}</td>
                   <td>
@@ -133,10 +143,24 @@ export default {
       return status === 'Running' || status === 'Pending'
     },
     formatDate (date) {
-      return moment(date).format('DD/MM/YYYY HH:mm:ss')
+      if (date) return moment(date).format('DD/MM/YYYY HH:mm:ss')
+      return ''
     },
-    duration (date1, date2) {
-      return moment.duration(moment(date1).diff(moment(date2))).asSeconds()
+    preciseDuration (seconds) {
+      if (seconds) {
+        const SECONDS_PER_HOUR = 3600
+        const SECONDS_PER_MINUTE = 60
+        const numhours = Math.floor(seconds / SECONDS_PER_HOUR)
+        const numminutes = Math.floor((seconds % SECONDS_PER_HOUR) / SECONDS_PER_MINUTE)
+        const numseconds = (seconds % SECONDS_PER_HOUR) % SECONDS_PER_MINUTE
+
+        const numHoursString = numhours ? `${numhours} h` : ''
+        const numMinutesString = numminutes ? `${numminutes} m` : ''
+
+        return `${numHoursString} ${numMinutesString} ${numseconds} s`
+      }
+
+      return ''
     },
     async getLog (cronjob) {
       try {
@@ -180,10 +204,9 @@ export default {
       return this.cronjobs.map(cronjob => ({
         ...cronjob,
         status: cronjob.status,
-        latestExecution: cronjob.latestExecution ? this.formatDate(cronjob.latestExecution) : null,
-        executionTime: cronjob.completionTime
-          ? this.duration(cronjob.completionTime, cronjob.latestExecution)
-          : null,
+        latestExecutionStart: this.formatDate(cronjob.latestExecution),
+        latestExecutionEnd: this.formatDate(cronjob.completionTime),
+        // executionTime,
         nextExecution: this.formatDate(cronjob.nextExecution),
         schedule: cronstrue.toString(cronjob.schedule),
       }))

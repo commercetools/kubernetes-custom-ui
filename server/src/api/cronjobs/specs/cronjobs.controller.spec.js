@@ -188,6 +188,7 @@ describe('Cronjobs controller', () => {
             schedule: cronjobList.items[0].spec.schedule,
             latestExecution: new Date(jobList.items[1].status.startTime).toISOString(),
             completionTime: new Date(jobList.items[1].status.completionTime).toISOString(),
+            executionTime: 30, // 2018-06-05T20:15:30Z - 2018-06-05T20:15:00Z
             nextExecution: '1982-02-11T00:15:00.000Z', // 15 minutes later than now
           },
           {
@@ -197,6 +198,7 @@ describe('Cronjobs controller', () => {
             schedule: cronjobList.items[1].spec.schedule,
             latestExecution: new Date(jobList.items[2].status.startTime).toISOString(),
             completionTime: new Date(jobList.items[2].status.completionTime).toISOString(),
+            executionTime: 30, // 2018-06-05T20:30:30Z - 2018-06-05T20:30:00
             nextExecution: '1982-02-11T00:05:00.000Z', // 5 minutes later than now
           },
         ]));

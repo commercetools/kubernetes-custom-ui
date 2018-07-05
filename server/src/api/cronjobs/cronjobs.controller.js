@@ -1,5 +1,6 @@
 import { curry, compose, map, orderBy } from 'lodash/fp';
 import cronParser from 'cron-parser';
+import moment from 'moment';
 import { ValidationError } from '../../errors';
 
 export default ({ cronjobsService, jobsService, podsService }) => {
@@ -51,19 +52,24 @@ export default ({ cronjobsService, jobsService, podsService }) => {
     };
   };
 
+  const duration = (date1, date2) => moment.duration(moment(date1).diff(moment(date2))).asSeconds();
+
   const getCronjobResult = curry((jobs, pods, cronjob) => {
     const latestJob = jobs.items.filter(isChild(cronjob.metadata.name)).reduce(getLatestJob, null);
     const latestJobPod = latestJob ? pods.items.filter(isChild(latestJob.metadata.name))[0] : null;
+    const latestExecution = latestJob && latestJob.status.startTime ?
+      new Date(latestJob.status.startTime).toISOString() : null;
+    const completionTime = latestJob && latestJob.status.completionTime ?
+      new Date(latestJob.status.completionTime).toISOString() : null;
 
     return {
       status: latestJobPod ? latestJobPod.status.phase : null,
       pod: latestJobPod ? latestJobPod.metadata.name : null,
       name: cronjob.metadata.name,
       schedule: cronjob.spec.schedule,
-      latestExecution: latestJob && latestJob.status.startTime ?
-        new Date(latestJob.status.startTime).toISOString() : null,
-      completionTime: latestJob && latestJob.status.completionTime ?
-        new Date(latestJob.status.completionTime).toISOString() : null,
+      latestExecution,
+      completionTime,
+      executionTime: completionTime ? duration(completionTime, latestExecution) : null,
       nextExecution: cronParser
         .parseExpression(cronjob.spec.schedule)
         .next()
