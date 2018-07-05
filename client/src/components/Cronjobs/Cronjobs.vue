@@ -4,6 +4,7 @@
       <div class="row">
         <div class="col-md-12">
           <div class="bgc-white bd bdrs-3 p-20 mB-20">
+            <span class="float-right">*Times are 24-hour clock in {{timezone}} timezone</span>
             <h4 class="c-grey-900 mB-10">Cronjobs</h4>
             <button type="submit" @click="getCronjobs"
               class="btn btn-primary btn-sm float-right mB-20">
@@ -162,6 +163,34 @@ export default {
 
       return ''
     },
+    getTimezoneSchedule (schedule) {
+      const scheduleParts = schedule.split(' ')
+      const hours = scheduleParts[1].split(',')
+
+      // timezone offset is in minutes
+      /* eslint-disable no-restricted-globals */
+      const hoursToTimezone = hours
+        .map((h) => {
+          if (!isNaN(h)) {
+            const hour = parseInt(h, 10)
+            const localHour = hour - (new Date().getTimezoneOffset() / 60)
+
+            if (localHour < 0)
+              return 24 + localHour
+            else if (localHour > 24)
+              return localHour - 24
+            return localHour
+          }
+
+          return null
+        })
+        .filter(Boolean)
+
+      if (hoursToTimezone.length)
+        scheduleParts[1] = hoursToTimezone.join(',')
+
+      return scheduleParts.join(' ')
+    },
     async getLog (cronjob) {
       try {
         const logData = await podsService.getLog(cronjob.pod, this.environment, cronjob.namespace)
@@ -206,9 +235,11 @@ export default {
         status: cronjob.status,
         latestExecutionStart: this.formatDate(cronjob.latestExecution),
         latestExecutionEnd: this.formatDate(cronjob.completionTime),
-        // executionTime,
         nextExecution: this.formatDate(cronjob.nextExecution),
-        schedule: cronstrue.toString(cronjob.schedule),
+        schedule: cronstrue.toString(
+          this.getTimezoneSchedule(cronjob.schedule),
+          { use24HourTimeFormat: true },
+        ),
       }))
     },
     faUndo () {
@@ -216,6 +247,9 @@ export default {
     },
     faFileAlt () {
       return faFileAlt
+    },
+    timezone () {
+      return Intl.DateTimeFormat().resolvedOptions().timeZone
     },
     ...mapState('general', ['environment']),
   },
