@@ -1,5 +1,6 @@
 import { curry, compose, map, orderBy } from 'lodash/fp';
 import cronParser from 'cron-parser';
+import later from 'later';
 import moment from 'moment';
 import { ValidationError } from '../../errors';
 
@@ -70,9 +71,8 @@ export default ({ cronjobsService, jobsService, podsService }) => {
       latestExecution,
       completionTime,
       executionTime: completionTime ? duration(completionTime, latestExecution) : null,
-      nextExecution: cronParser
-        .parseExpression(cronjob.spec.schedule)
-        .next()
+      nextExecution: later.schedule(later.parse.cron(cronjob.spec.schedule))
+        .next(1, Date.now())
         .toISOString(),
       namespace: cronjob.metadata.namespace,
     };

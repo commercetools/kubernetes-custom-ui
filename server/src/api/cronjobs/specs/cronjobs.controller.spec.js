@@ -51,6 +51,7 @@ describe('Cronjobs controller', () => {
             {
               metadata: {
                 name: 'dummy-cronjob-1',
+                namespace: 'default',
               },
               spec: {
                 schedule: '*/15 * * * *',
@@ -59,6 +60,7 @@ describe('Cronjobs controller', () => {
             {
               metadata: {
                 name: 'dummy-cronjob-2',
+                namespace: 'default',
               },
               spec: {
                 schedule: '*/5 * * * *',
@@ -165,7 +167,9 @@ describe('Cronjobs controller', () => {
         cronjobsService.find = jest.fn().mockResolvedValue(cronjobList);
         jobsService.find = jest.fn().mockResolvedValue(jobList);
         podsService.find = jest.fn().mockResolvedValue(podList);
-        Date.now = jest.fn().mockReturnValue('1982-02-11T00:00:00.000Z');
+        // to test next execution, we mock the current time and thus, we can
+        // write the proper expectation
+        Date.now = jest.fn().mockReturnValue('1982-02-11T00:00:01.000Z');
 
         await cronjobsController.find(req, res, next);
       });
@@ -190,6 +194,7 @@ describe('Cronjobs controller', () => {
             completionTime: new Date(jobList.items[1].status.completionTime).toISOString(),
             executionTime: 30, // 2018-06-05T20:15:30Z - 2018-06-05T20:15:00Z
             nextExecution: '1982-02-11T00:15:00.000Z', // 15 minutes later than now
+            namespace: 'default',
           },
           {
             status: podList.items[2].status.phase,
@@ -200,6 +205,7 @@ describe('Cronjobs controller', () => {
             completionTime: new Date(jobList.items[2].status.completionTime).toISOString(),
             executionTime: 30, // 2018-06-05T20:30:30Z - 2018-06-05T20:30:00
             nextExecution: '1982-02-11T00:05:00.000Z', // 5 minutes later than now
+            namespace: 'default',
           },
         ]));
     });
