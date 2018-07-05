@@ -37,6 +37,7 @@ export default function () {
       expiresIn: config.get('TOKEN:MAX_AGE_SECONDS')
         ? parseInt(config.get('TOKEN:MAX_AGE_SECONDS'), 10)
         : constants.DEFAULT_TOKEN_MAX_AGE_SECONDS,
+      authService: _container.resolve('authService'),
     };
   };
 
