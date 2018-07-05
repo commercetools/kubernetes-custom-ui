@@ -63,7 +63,8 @@
                   <td>
                     {{cronjob.latestExecutionEnd}}
                     <a href="" @click.prevent="getLog(cronjob)"
-                      class="pL-10" v-show="cronjob.latestExecutionEnd">
+                      class="pL-10" v-if="cronjob.latestExecutionStart
+                        && !isRunning(cronjob.status)">
                       <font-awesome-icon :icon="faFileAlt" />
                     </a>
                   </td>
