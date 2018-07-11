@@ -210,9 +210,8 @@ export default {
         const blob = new Blob([logData], { type: 'text/plain' })
         const link = document.createElement('a')
 
-        const dateFormat = 'DDMMYYYY_HH_mm_ss'
-        const dateFormatted = moment(cronjob.latestExecution, 'DD/MM/YYYY HH:mm:ss')
-          .format(dateFormat)
+        const dateFormat = 'DD_MM_YYYY_HH_mm_ss'
+        const dateFormatted = moment(cronjob.latestExecution).format(dateFormat)
 
         link.href = window.URL.createObjectURL(blob)
         link.target = '_blank'
