@@ -1,5 +1,4 @@
 import { curry, compose, map, orderBy } from 'lodash/fp';
-import cronParser from 'cron-parser';
 import later from 'later';
 import moment from 'moment';
 import { ValidationError } from '../../errors';
@@ -75,6 +74,8 @@ export default ({ cronjobsService, jobsService, podsService }) => {
         .next(1, Date.now())
         .toISOString(),
       namespace: cronjob.metadata.namespace,
+      runOnDemandOnly:
+        Boolean(cronjob.spec.jobTemplate.spec.template.metadata.labels.runOnDemandOnly),
     };
   });
 

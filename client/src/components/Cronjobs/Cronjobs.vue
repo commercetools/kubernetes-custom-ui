@@ -192,6 +192,17 @@ export default {
 
       return scheduleParts.join(' ')
     },
+    getSchedule (cronjob) {
+      return cronjob.runOnDemandOnly ? 'Not scheduled' :
+        cronstrue.toString(
+          this.getTimezoneSchedule(cronjob.schedule),
+          { use24HourTimeFormat: true },
+        )
+    },
+    getNextExecution (cronjob) {
+      return cronjob.runOnDemandOnly ? '' :
+        this.formatDate(cronjob.nextExecution)
+    },
     async getLog (cronjob) {
       try {
         const logData = await podsService.getLog(cronjob.pod, this.environment, cronjob.namespace)
@@ -236,11 +247,8 @@ export default {
         status: cronjob.status,
         latestExecutionStart: this.formatDate(cronjob.latestExecution),
         latestExecutionEnd: this.formatDate(cronjob.completionTime),
-        nextExecution: this.formatDate(cronjob.nextExecution),
-        schedule: cronstrue.toString(
-          this.getTimezoneSchedule(cronjob.schedule),
-          { use24HourTimeFormat: true },
-        ),
+        nextExecution: this.getNextExecution(cronjob),
+        schedule: this.getSchedule(cronjob),
       }))
     },
     faUndo () {

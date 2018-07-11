@@ -55,6 +55,18 @@ describe('Cronjobs controller', () => {
               },
               spec: {
                 schedule: '*/15 * * * *',
+                jobTemplate: {
+                  spec: {
+                    template: {
+                      metadata: {
+                        labels: {
+                          app: 'cronjob',
+                          runOnDemandOnly: false,
+                        },
+                      },
+                    },
+                  },
+                },
               },
             },
             {
@@ -64,6 +76,18 @@ describe('Cronjobs controller', () => {
               },
               spec: {
                 schedule: '*/5 * * * *',
+                jobTemplate: {
+                  spec: {
+                    template: {
+                      metadata: {
+                        labels: {
+                          app: 'cronjob',
+                          runOnDemandOnly: true,
+                        },
+                      },
+                    },
+                  },
+                },
               },
             },
           ],
@@ -195,6 +219,7 @@ describe('Cronjobs controller', () => {
             executionTime: 30, // 2018-06-05T20:15:30Z - 2018-06-05T20:15:00Z
             nextExecution: '1982-02-11T00:15:00.000Z', // 15 minutes later than now
             namespace: 'default',
+            runOnDemandOnly: false,
           },
           {
             status: podList.items[2].status.phase,
@@ -206,6 +231,7 @@ describe('Cronjobs controller', () => {
             executionTime: 30, // 2018-06-05T20:30:30Z - 2018-06-05T20:30:00
             nextExecution: '1982-02-11T00:05:00.000Z', // 5 minutes later than now
             namespace: 'default',
+            runOnDemandOnly: true,
           },
         ]));
     });
