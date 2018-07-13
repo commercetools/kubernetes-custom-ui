@@ -30,16 +30,19 @@ export const generateValidationError = validationResult =>
     { message: '', errors: [] },
   );
 
-export default schema => (req, res, next) => {
+export default schema => {
   const validator = new Validator();
   const check = validator.compile(schema);
-  const validationResult = check(req.body);
 
-  if (validationResult === true) {
-    return next();
-  }
+  return (req, res, next) => {
+    const validationResult = check(req.body);
 
-  const validationError = generateValidationError(validationResult);
+    if (validationResult === true) {
+      return next();
+    }
 
-  return next(new ValidationError(validationError.message, null, validationError.errors));
+    const validationError = generateValidationError(validationResult);
+
+    return next(new ValidationError(validationError.message, null, validationError.errors));
+  };
 };

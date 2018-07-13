@@ -16,11 +16,15 @@ export default ({ commercetools }) => {
       .then(res => res.body.customer)
       .catch(err => {
         // If the credentials are not valid commercetools returns HTTP 400
-        if (err.statusCode === 400) {
-          throw new NotAuthenticatedError();
+        if (err.statusCode) {
+          if (err.statusCode === 400) {
+            throw new NotAuthenticatedError();
+          }
+
+          throw new CommercetoolsError(err);
         }
 
-        throw new CommercetoolsError(err);
+        throw err;
       });
   };
 
