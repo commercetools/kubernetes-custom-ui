@@ -1,0 +1,64 @@
+.brand {
+  width: 90px;
+  height: 90px;
+  overflow: hidden;
+  border-radius: 50%;
+  margin: 0 auto;
+  margin: 40px auto;
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.05);
+}
+.brand img {
+  width: 100%;
+}
+.card-wrapper {
+  width: 400px;
+  margin: 0 auto;
+}
+
+.card {
+  border-color: transparent;
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.05);
+  font-size: 14px;
+}
+
+.card.fat {
+  padding: 10px;
+}
+
+.card .card-title {
+  margin-bottom: 30px;
+}
+
+.form-control {
+  border-width: 2.3px;
+}
+.form-group label {
+  width: 100%;
+}
+
+.btn.btn-block {
+  padding: 12px 10px;
+}
+
+.footer {
+  margin: 40px 0;
+  color: #888;
+  text-align: center;
+}
+
+@media screen and (max-width: 425px) {
+  .card-wrapper {
+    width: 90%;
+    margin: 0 auto;
+  }
+}
+
+@media screen and (max-width: 320px) {
+  .card.fat {
+    padding: 0;
+  }
+
+  .card.fat .card-body {
+    padding: 15px;
+  }
+}
