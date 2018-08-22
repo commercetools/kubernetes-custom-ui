@@ -1,6 +1,6 @@
 {
   "name": "kubernetes-custom-ui",
-  "version": "0.1.0",
+  "version": "1.0",
   "description": "Kubernetes Custom UI (server)",
   "main": "dist/index.js",
   "watch": {
