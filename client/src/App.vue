@@ -1,28 +1,19 @@
 <template>
   <div id="app">
-    <img src="./assets/logo.png">
-    <home/>
+    <router-view></router-view>
+    <vue-progress-bar></vue-progress-bar>
+    <notifications position="top center"></notifications>
   </div>
 </template>
 
 <script>
-import Home from './components/Home'
-
 export default {
   name: 'App',
-  components: {
-    Home,
-  },
 }
 </script>
-
-<style>
-#app {
-  font-family: "Avenir", Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
+<style lang="scss">
+body {
+  background-color: #f7f9fb;
 }
 </style>
+

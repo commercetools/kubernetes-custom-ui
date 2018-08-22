@@ -1,6 +1,6 @@
 {
   "name": "kubernetes-custom-ui",
-  "version": "0.1.0",
+  "version": "1.0",
   "description": "Kubernetes Custom UI (server)",
   "main": "dist/index.js",
   "watch": {
@@ -54,19 +54,28 @@
     "body-parser": "^1.18.3",
     "compression": "^1.7.2",
     "cors": "^2.8.4",
+    "cron-parser": "^2.5.0",
     "cross-env": "^5.1.6",
     "express": "^4.16.3",
     "express-jwt": "^5.3.1",
     "fastest-validator": "^0.6.7",
+    "google-auth-library": "^1.5.0",
     "helmet": "^3.12.1",
     "jsonwebtoken": "^8.2.1",
+    "later": "^1.2.0",
     "lodash": "^4.17.10",
+    "moment": "^2.22.2",
     "morgan": "^1.9.0",
     "nconf": "^0.10.0",
     "node-fetch": "^2.1.2",
+    "request": "^2.87.0",
+    "request-promise-native": "^1.0.5",
     "winston": "^2.4.2"
   },
   "lint-staged": {
-    "src/**/*.{js,json}": ["prettier-eslint --write", "git add"]
+    "src/**/*.{js,json}": [
+      "prettier-eslint --write",
+      "git add"
+    ]
   }
 }
