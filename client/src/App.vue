@@ -1,19 +1,14 @@
 <template>
   <div id="app">
-    <div class="container-fluid">
-      <sign-in/>
-    </div>
+    <router-view></router-view>
+    <vue-progress-bar></vue-progress-bar>
+    <notifications position="top center"></notifications>
   </div>
 </template>
 
 <script>
-import SignIn from './components/SignIn'
-
 export default {
   name: 'App',
-  components: {
-    SignIn,
-  },
 }
 </script>
 <style lang="scss">

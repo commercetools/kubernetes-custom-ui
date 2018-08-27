@@ -1,12 +1,14 @@
 import path from 'path';
-import { createContainer, asFunction, Lifetime } from 'awilix';
+import { createContainer, asFunction, asValue, Lifetime } from 'awilix';
 import Config from '../config';
 import Logger from '../logger';
 import AuthController from '../api/auth/auth.controller';
 import AuthLocalMiddleware from '../authentication/middlewares/local.middleware';
 import CommerceTools from '../commercetools';
 import AuthJwtMiddleware from '../authentication/middlewares/jwt.middleware';
+import GoogleCloudService from '../k8s/auth-services/google.cloud.service';
 import constants from '../constants';
+import K8sClient from '../k8s/client';
 
 // Dependency Injection Container
 export default function () {
@@ -62,6 +64,42 @@ export default function () {
     };
   };
 
+  const getK8sClientParams = _container => {
+    const config = _container.resolve('config');
+    const provider = config.get('KUBERNETES:PROVIDER');
+    let authService;
+
+    if (provider) {
+      // Only support for Google Cloud Platform for now
+      if (provider === 'GOOGLE_CLOUD') {
+        authService = GoogleCloudService({
+          clientEmail: config.get('KUBERNETES:PROVIDERS:GOOGLE_CLOUD:CLIENT_EMAIL'),
+          privateKey: config.get('KUBERNETES:PROVIDERS:GOOGLE_CLOUD:PRIVATE_KEY').replace(/\\n/g, '\n'),
+        });
+      }
+    }
+
+    return {
+      authService,
+    };
+  };
+
+  const getEnvironments = _container => {
+    const config = _container.resolve('config');
+    const environments = config.get('KUBERNETES:ENVIRONMENTS');
+
+    const envs = Object.entries(environments).map(([key, value]) => {
+      return {
+        key: key.toLowerCase(),
+        name: value.LABEL,
+        host: value.HOST,
+        namespaces: Object.values(value.NAMESPACES),
+      };
+    });
+
+    return envs;
+  };
+
   // Registering and auto resolving the dependencies between controllers and services
   container.loadModules(
     [
@@ -84,7 +122,10 @@ export default function () {
     authController: getSingleton(AuthController, getAuthControllerParams),
     authLocalMiddleware: getSingleton(AuthLocalMiddleware),
     authJwtMiddleware: getSingleton(AuthJwtMiddleware, getJwtMiddlewareParams),
+    k8sClient: getSingleton(K8sClient, getK8sClientParams),
   });
+
+  container.register('environments', asValue(getEnvironments(container)));
 
   return container;
 }

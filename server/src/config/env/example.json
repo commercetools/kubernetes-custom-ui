@@ -1,0 +1,45 @@
+{
+  "PORT": 3000,
+  "LOGGER": {
+    "LEVEL": "debug"
+  },
+  "TOKEN": {
+    "SECRET": "dummy-token-secret",
+    "MAX_AGE_SECONDS": 0
+  },
+  "COMMERCE_TOOLS": {
+    "API_HOST": "dummy-commercetools-api-host",
+    "OAUTH_URL": "dummy-commercetools-oauth-url",
+    "PROJECT_KEY": "dummy-commercetools-project-key",
+    "CLIENT_ID": "dummy-commercetools-client-id",
+    "CLIENT_SECRET": "dummy-commercetools-client-secret",
+    "CONCURRENCY": 10
+  },
+  "KUBERNETES": {
+    "PROVIDER": "dummy-kubernetes-cloud-provider",
+    "PROVIDERS": {
+      "GOOGLE_CLOUD": {
+        "CLIENT_EMAIL": "dummy-kubernetes-google-cloud-email",
+        "PRIVATE_KEY": "dummy-kubernetes-google-cloud-private-key"
+      }
+    },
+    "ENVIRONMENTS": {
+      "ENVIRONMENT_ONE": {
+        "LABEL": "dummy-environment-one-label",
+        "HOST": "dummy-environment-one-host",
+        "NAMESPACES": {
+          "DEFAULT": "dummy-environment-one-default",
+          "ANOTHER_NAMESPACE": "dummy-environment-one-another-namespace"
+        }
+      },
+      "ENVIRONMENT_TWO": {
+        "LABEL": "dummy-environment-two-label",
+        "HOST": "dummy-environment-two-host",
+        "NAMESPACES": {
+          "DEFAULT": "dummy-environment-two-default",
+          "ANOTHER_NAMESPACE": "dummy-environment-two-another-namespace"
+        }
+      }
+    }
+  }
+}
