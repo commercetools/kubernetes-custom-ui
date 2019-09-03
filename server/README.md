@@ -56,7 +56,7 @@ These are the environment variables to configure the server:
 | `TOKEN__MAX_AGE_SECONDS` | Time to live of the JWT token  | `86400` (one day) |
 | `COMMERCE_TOOLS__API_HOST` | commercetools API host according to [API hosts](https://docs.commercetools.com/http-api.html#hosts)   | (Required) |
 | `COMMERCE_TOOLS__OAUTH_URL` |commercetools OAuth host according to [OAuth hosts](https://docs.commercetools.com/http-api-authorization.html#hosts) | (Required) |
-| `COMMERCE_TOOLS__PROJECT_KEY` |commercetools project key where the users will be created and authenticated. You can create an account [here](https://admin.commercetools.com/signup) and within your account you will be able to create a new project. With the project already created, you will have access to the project credentials | (Required) |
+| `COMMERCE_TOOLS__PROJECT_KEY` |commercetools project key where the users will be created and authenticated. You can create an account [here](https://mc.commercetools.com/) and within your account you will be able to create a new project. With the project already created, you will have access to the project credentials | (Required) |
 | `COMMERCE_TOOLS__CLIENT_ID` | commercetools project client id | (Required) |
 | `COMMERCE_TOOLS__CLIENT_SECRET` | commercetools project client secret | (Required) |
 | `COMMERCE_TOOLS__CONCURRENCY` | the max number of concurrent requests | `10` |
