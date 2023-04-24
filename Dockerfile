@@ -1,5 +1,5 @@
 # BUILDER
-FROM node:10-alpine as builder
+FROM node:20-alpine as builder
 
 ADD client /client
 ADD server /server
@@ -20,7 +20,7 @@ ENV NODE_ENV production
 RUN npm install
 
 # FINAL IMAGE
-FROM node:10-alpine
+FROM node:20-alpine
 
 COPY --from=builder /client/dist /client/dist
 COPY --from=builder /server/dist /server/dist
